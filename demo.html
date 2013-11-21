@@ -16,9 +16,24 @@ select {
 <script>
 function init() {
     
+    function hexToRgb(hex) {
+        // Expand shorthand form (e.g. "03F") to full form (e.g. "0033FF")
+        var shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
+        hex = hex.replace(shorthandRegex, function(m, r, g, b) {
+                          return r + r + g + g + b + b;
+                          });
+                          
+                          var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+                          return result ? {
+                              r: parseInt(result[1], 16),
+                              g: parseInt(result[2], 16),
+                              b: parseInt(result[3], 16)
+                          } : null;
+    }
+    
     var canv = document.getElementById('myCanvas'),
         colorSelect = document.getElementById('colorSelect'),
-        demoBtn = document.getElementById('demoBtn'),
+        clearBtn = document.getElementById('clearBtn'),
         context = canv.getContext('2d'),
         elements = [],
         color = colorSelect.options[colorSelect.selectedIndex].value,
@@ -34,16 +49,25 @@ function init() {
     function circle(x, y, col) {
         context.beginPath();
         context.arc(x, y, radius, 0, 2 * Math.PI, false);
-        context.fillStyle = col;
+
+        var c = hexToRgb(col)
+        context.fillStyle = 'rgb(' + c.r + ',' + c.g + ',' + c.b + ')';
+        
         context.fill();
         context.stroke();
     }
     
     function displayTreePredictions() {
+        context.clearRect ( 0 , 0 , canv.width , canv.height );
+        
         for(var x = 0; x < canv.width; x++) {
             for(var y = 0; y < canv.height; y++) {
+
+                var predictedColor = predict(tree, {x : x, y : y});
+                
                 // put pixel
-                context.fillStyle = 'light' + predict(tree, {x : x, y : y});
+                var c = hexToRgb(predictedColor);
+                context.fillStyle = 'rgba(' + c.r + ',' + c.g + ',' + c.b + ',' + 0.5 + ')';
                 context.fillRect( x, y, 1, 1 );
             }
         }
@@ -81,10 +105,9 @@ function init() {
                                     color = colorSelect.options[colorSelect.selectedIndex].value;
                                  });
 
-    demoBtn.addEventListener('click',
+    clearBtn.addEventListener('click',
                              function(event) {
-                                context.fillStyle = 'white';
-                                context.fillRect( 0, 0, canv.width, canv.height );
+                                context.clearRect ( 0 , 0 , canv.width , canv.height );
                                 points = [];
                              });
 }
@@ -93,14 +116,15 @@ function init() {
 <body onload="init()">
     
 	<select id="colorSelect">
-		<option>green</option>
-		<option>blue</option>
+		<option value="#33CCFF">Blue</option>
+		<option value="#FF6600">Red</option>
+        <option value="#009933">Green</option>
 	</select>
     
-	<button id="demoBtn">clear</button>
+	<button id="clearBtn">clear</button>
     
 	<br/>
     
-	<canvas id="myCanvas" width="200" height="200" />
+	<canvas id="myCanvas" width="200" height="200"/>
 </body>
 </html>
