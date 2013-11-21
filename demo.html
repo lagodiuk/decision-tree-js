@@ -59,7 +59,12 @@ function init() {
     
     function rebuildAndDisplayTree() {
         addingPoints = false;
-        tree = buildTree(points, 1, 'color');
+        
+        var threshold = points.length / 100;
+        threshold = (threshold > 1) ? threshold : 1;
+        
+        tree = buildTree(points, threshold, 'color');
+        
         displayTreePredictions();
         displayPoints();
     }
