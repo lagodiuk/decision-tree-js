@@ -57,6 +57,13 @@ function init() {
         context.stroke();
     }
     
+    function rebuildAndDisplayTree() {
+        addingPoints = false;
+        tree = buildTree(points, 1, 'color');
+        displayTreePredictions();
+        displayPoints();
+    }
+    
     function displayTreePredictions() {
         context.clearRect ( 0 , 0 , canv.width , canv.height );
         
@@ -78,26 +85,25 @@ function init() {
             circle(points[p].x, points[p].y, points[p].color);
         }
     }
-
-    // Add event listener for `click` events.
-    canv.addEventListener('click',
-                          function(event) {
-                            var x = event.pageX - canv.offsetLeft,
-                                y = event.pageY - canv.offsetTop;
     
-                            circle(x, y, color);
+    var addingPoints = false;
+    canv.addEventListener('mousedown',
+                          function(e){
+                          addingPoints = true;
+                          });
+    
+    canv.addEventListener('mouseup', rebuildAndDisplayTree);
 
-                            points.push({x : x, y : y, color : color});
-                          
-                            if(tree && predict(tree, {x : x, y : y}) == color) {
-                                return;
+    canv.addEventListener('mouseout', rebuildAndDisplayTree);
+    
+    canv.addEventListener('mousemove',
+                          function(e) {
+                            if(addingPoints) {
+                                var x = event.pageX - canv.offsetLeft,
+                                    y = event.pageY - canv.offsetTop;
+                                    circle(x, y, color);
+                                    points.push({x : x, y : y, color : color});
                             }
-                  
-                            tree = buildTree(points, 1, 'color');
-                      
-                            displayTreePredictions();
-                      
-                            displayPoints();
                           });
 
     colorSelect.addEventListener('change',
