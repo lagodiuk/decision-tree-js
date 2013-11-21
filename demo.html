@@ -23,11 +23,13 @@ function init() {
         elements = [],
         color = colorSelect.options[colorSelect.selectedIndex].value,
         radius = 3,
-        points = [];
+        points = [],
+        tree = null;
         
+    // Default set of predicates is: '==', '>=' and '<='
+    // But each point have only continuous attributes: x, y
+    // So, we will use only '>=' and '<=' predicates
     delete predicates['=='];
-    
-    var tree = null;
     
     function circle(x, y, col) {
         context.beginPath();
@@ -36,6 +38,22 @@ function init() {
         context.fill();
         context.stroke();
     }
+    
+    function displayTreePredictions() {
+        for(var x = 0; x < canv.width; x++) {
+            for(var y = 0; y < canv.height; y++) {
+                // put pixel
+                context.fillStyle = 'light' + predict(tree, {x : x, y : y});
+                context.fillRect( x, y, 1, 1 );
+            }
+        }
+    }
+    
+    function displayPoints() {
+        for(var p in points) {
+            circle(points[p].x, points[p].y, points[p].color);
+        }
+    }
 
     // Add event listener for `click` events.
     canv.addEventListener('click',
@@ -43,28 +61,20 @@ function init() {
                             var x = event.pageX - canv.offsetLeft,
                                 y = event.pageY - canv.offsetTop;
     
-                                circle(x, y, color);
+                            circle(x, y, color);
 
-                                points.push({x : x, y : y, color : color});
+                            points.push({x : x, y : y, color : color});
                           
-                                if(tree && predict(tree, {x : x, y : y}) == color) {
-                                    return;
-                                }
+                            if(tree && predict(tree, {x : x, y : y}) == color) {
+                                return;
+                            }
+                  
+                            tree = buildTree(points, 1, 'color');
                       
-                                tree = buildTree(points, 1, 'color');
+                            displayTreePredictions();
                       
-                                for(var x = 0; x < canv.width; x++) {
-                                    for(var y = 0; y < canv.height; y++) {
-                                        context.fillStyle = predict(tree, {x : x, y : y});
-                                        context.fillRect( x, y, 1, 1 );
-                                    }
-                                }
-                      
-                                for(var p in points) {
-                                    circle(points[p].x, points[p].y, points[p].color);
-                                }
-                          },
-                          false);
+                            displayPoints();
+                          });
 
     colorSelect.addEventListener('change',
                                  function(event) {
@@ -84,7 +94,7 @@ function init() {
     
 	<select id="colorSelect">
 		<option>green</option>
-		<option>red</option>
+		<option>blue</option>
 	</select>
     
 	<button id="demoBtn">clear</button>
