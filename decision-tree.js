@@ -45,7 +45,7 @@ function predict(tree, item) {
 
 
 
-
+/*
 var points = []
 for(var i = 0; i < 150; i++) {
     var x = (Math.random() - Math.random()) * 10;
@@ -73,3 +73,4 @@ for(var i = 0; i < 1000; i++) {
     if(pt.c == pt.prediction) stat.correct++; else stat.incorrect++;
 }
 alert(JSON.stringify(stat, null, 4))
+*/

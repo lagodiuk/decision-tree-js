@@ -1,0 +1,85 @@
+<html>
+
+<script src="decision-tree.js"></script>
+
+<style>
+canvas {
+    border: 1px solid #ccc;
+    margin: 30px;
+}
+
+select {
+    margin: 30px;
+}
+</style>
+
+<script>
+function init()
+{
+var canv = document.getElementById('myCanvas'),
+    canvLeft = canv.offsetLeft,
+    canvTop = canv.offsetTop,
+    canvWidth = canv.width,
+    canvHeight = canv.height,
+    context = canv.getContext('2d'),
+    elements = [];
+    colorSelect = document.getElementById('colorSelect'),
+    color = colorSelect.options[colorSelect.selectedIndex].value,
+    demoBtn = document.getElementById('demoBtn');
+
+var points = [];
+
+// Add event listener for `click` events.
+canv.addEventListener('click', function(event) {
+    var x = event.pageX - canvLeft,
+        y = event.pageY - canvTop;
+    
+      context.beginPath();
+      context.arc(x, y, 5, 0, 2 * Math.PI, false);
+      context.fillStyle = color;
+      context.fill();
+      context.stroke();
+
+      points.push({x : x, y : y, color : color});
+    
+}, false);
+
+colorSelect.addEventListener('change', function(event) {
+    color = colorSelect.options[colorSelect.selectedIndex].value;
+});
+
+delete predicates['=='];
+
+demoBtn.addEventListener('click', function(event) {
+    var tree = buildTree(points, 3, 'color');
+    //alert(JSON.stringify(tree, null, 4));
+    
+    for(var x = 0; x < canvWidth; x++) {
+        for(var y = 0; y < canvHeight; y++) {
+            context.fillStyle = predict(tree, {x : x, y : y});
+            context.fillRect( x, y, 1, 1 );
+        }
+    }
+
+    for(var p in points) {
+        context.beginPath();
+      context.arc(points[p].x, points[p].y, 5, 0, 2 * Math.PI, false);
+      context.fillStyle = points[p].color;
+      context.fill();
+      context.stroke();
+    }
+});
+
+}
+</script>
+
+<body onload="init()">
+	<select id="colorSelect">
+		<option>green</option>
+		<option>red</option>
+	</select>
+	<button id="demoBtn">test</button>
+	<br/>
+	<canvas id="myCanvas" width="200" height="200" />
+</body>
+</html>
