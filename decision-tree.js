@@ -20,11 +20,12 @@ function mostFrequentCategory(items, categoryAttr) {
     return mostFrequent.category;
 }
 
+var ENTROPY_THRESHOLD = 0.001;
 function buildTree(items, threshold, categoryAttr) {
     if(!categoryAttr) categoryAttr = 'category';
     if(!threshold) threshold = 1;
     var initialEntropy = entropy(items, categoryAttr);
-    if((initialEntropy == 0) || (items.length <= threshold)) return {category : mostFrequentCategory(items, categoryAttr)};
+    if((initialEntropy < ENTROPY_THRESHOLD) || (items.length <= threshold)) return {category : mostFrequentCategory(items, categoryAttr)};
     var bestSplit; 
     items.forEach(function(item) {
         for(var attr in item) if(attr !== categoryAttr) {            

@@ -91,6 +91,8 @@ function init() {
     
     canv.addEventListener('mouseup',
                           function(e) {
+                            if(points.length == 0) return;
+                          
                             addingPoints = false;
                           
                             var threshold = points.length / 100;
@@ -105,6 +107,8 @@ function init() {
 
     canv.addEventListener('mouseout',
                           function(e) {
+                            if(points.length == 0) return;
+                          
                             addingPoints = false;
                           
                             var threshold = points.length / 100;
