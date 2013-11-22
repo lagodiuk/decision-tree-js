@@ -19,16 +19,17 @@ function init() {
     function hexToRgb(hex) {
         // Expand shorthand form (e.g. "03F") to full form (e.g. "0033FF")
         var shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
-        hex = hex.replace(shorthandRegex, function(m, r, g, b) {
-                          return r + r + g + g + b + b;
+        hex = hex.replace(shorthandRegex,
+                          function(m, r, g, b) {
+                            return r + r + g + g + b + b;
                           });
                           
-                          var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-                          return result ? {
-                              r: parseInt(result[1], 16),
-                              g: parseInt(result[2], 16),
-                              b: parseInt(result[3], 16)
-                          } : null;
+        var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+        return result ? {
+                            r: parseInt(result[1], 16),
+                            g: parseInt(result[2], 16),
+                            b: parseInt(result[3], 16)
+                        } : null;
     }
     
     var canv = document.getElementById('myCanvas'),
@@ -46,27 +47,16 @@ function init() {
     // So, we will use only '>=' and '<=' predicates
     delete predicates['=='];
     
-    function circle(x, y, col) {
+    function drawCircle(x, y, hexColor) {
         context.beginPath();
         context.arc(x, y, radius, 0, 2 * Math.PI, false);
 
-        var c = hexToRgb(col)
+        var c = hexToRgb(hexColor)
         context.fillStyle = 'rgb(' + c.r + ',' + c.g + ',' + c.b + ')';
         
         context.fill();
+        context.closePath();
         context.stroke();
-    }
-    
-    function rebuildAndDisplayTree() {
-        addingPoints = false;
-        
-        var threshold = points.length / 100;
-        threshold = (threshold > 1) ? threshold : 1;
-        
-        tree = buildTree(points, threshold, 'color');
-        
-        displayTreePredictions();
-        displayPoints();
     }
     
     function displayTreePredictions() {
@@ -75,10 +65,10 @@ function init() {
         for(var x = 0; x < canv.width; x++) {
             for(var y = 0; y < canv.height; y++) {
 
-                var predictedColor = predict(tree, {x : x, y : y});
+                var predictedHexColor = predict(tree, {x : x, y : y});
                 
                 // put pixel
-                var c = hexToRgb(predictedColor);
+                var c = hexToRgb(predictedHexColor);
                 context.fillStyle = 'rgba(' + c.r + ',' + c.g + ',' + c.b + ',' + 0.5 + ')';
                 context.fillRect( x, y, 1, 1 );
             }
@@ -87,40 +77,70 @@ function init() {
     
     function displayPoints() {
         for(var p in points) {
-            circle(points[p].x, points[p].y, points[p].color);
+            drawCircle(points[p].x, points[p].y, points[p].color);
         }
     }
     
     var addingPoints = false;
     canv.addEventListener('mousedown',
-                          function(e){
-                          addingPoints = true;
-                          });
+                          function(e) {
+                            e.preventDefault();
+                            addingPoints = true;
+                          },
+                          false);
     
-    canv.addEventListener('mouseup', rebuildAndDisplayTree);
+    canv.addEventListener('mouseup',
+                          function(e) {
+                            addingPoints = false;
+                          
+                            var threshold = points.length / 100;
+                            threshold = (threshold > 1) ? threshold : 1;
+                          
+                            tree = buildTree(points, threshold, 'color');
+                          
+                            displayTreePredictions();
+                            displayPoints();
+                          },
+                          false);
 
-    canv.addEventListener('mouseout', rebuildAndDisplayTree);
+    canv.addEventListener('mouseleave',
+                          function(e) {
+                            addingPoints = false;
+                          
+                            var threshold = points.length / 100;
+                            threshold = (threshold > 1) ? threshold : 1;
+                          
+                            tree = buildTree(points, threshold, 'color');
+                          
+                            displayTreePredictions();
+                            displayPoints();
+                          },
+                          false);
     
     canv.addEventListener('mousemove',
                           function(e) {
                             if(addingPoints) {
-                                var x = event.pageX - canv.offsetLeft,
-                                    y = event.pageY - canv.offsetTop;
-                                    circle(x, y, color);
-                                    points.push({x : x, y : y, color : color});
+                                var x = e.offsetX ? e.offsetX : (e.layerX - canv.offsetLeft);
+                                var y = e.offsetY ? e.offsetY : (e.layerY - canv.offsetTop );
+                                drawCircle(x, y, color);
+                                points.push({x : x, y : y, color : color});
                             }
-                          });
+                          },
+                          false);
 
     colorSelect.addEventListener('change',
                                  function(event) {
-                                    color = colorSelect.options[colorSelect.selectedIndex].value;
-                                 });
+                                    var selected = colorSelect.selectedIndex;
+                                    color = colorSelect.options[selected].value;
+                                 },
+                                 false);
 
     clearBtn.addEventListener('click',
-                             function(event) {
+                              function(event) {
                                 context.clearRect ( 0 , 0 , canv.width , canv.height );
                                 points = [];
-                             });
+                              },
+                              false);
 }
 </script>
 
@@ -136,6 +156,6 @@ function init() {
     
 	<br/>
     
-	<canvas id="myCanvas" width="200" height="200"/>
+	<canvas id="myCanvas" width="200" height="200"></canvas>
 </body>
 </html>
