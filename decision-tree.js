@@ -68,13 +68,13 @@ function mostFrequentCategory(items, attr) {
     var mostFrequentCategory;
     
     for(var c in counter) {
-        if(mostFrequentCategory && (counter[c] < mostFrequentCount)) {
-            continue;
+        if(!mostFrequentCategory || (counter[c] > mostFrequentCount)) {
+            
+            mostFrequentCount = counter[c];
+            mostFrequentCategory = c;
         }
-        
-        mostFrequentCount = counter[c];
-        mostFrequentCategory = c;
     };
+    
     return mostFrequentCategory;
 }
 
@@ -94,7 +94,8 @@ function buildTree(items, threshold, categoryAttr) {
         return {category : mostFrequentCategory(items, categoryAttr)}
     };
     
-    var bestSplit; 
+    var bestSplit;
+    
     for(var i in items) {
         var item = items[i];
         
@@ -107,13 +108,22 @@ function buildTree(items, threshold, categoryAttr) {
                 
                 var currSplit = split(items, attr, predicate, item[attr]);
                 
-                currSplit.gain = initialEntropy - (entropy(currSplit.match, categoryAttr) * currSplit.match.length + entropy(currSplit.notMatch, categoryAttr) * currSplit.notMatch.length) / items.length;
+                var matchEntropy = entropy(currSplit.match, categoryAttr);
+                var notMatchEntropy = entropy(currSplit.notMatch, categoryAttr);
                 
-                if(!bestSplit || (currSplit.gain > 0 && bestSplit.gain < currSplit.gain)) bestSplit = currSplit;
+                currSplit.gain = initialEntropy - (matchEntropy * currSplit.match.length + notMatchEntropy * currSplit.notMatch.length) / items.length;
+                
+                if(!bestSplit || (currSplit.gain > 0 && bestSplit.gain < currSplit.gain)) {
+                    bestSplit = currSplit;
+                }
             }
         }
     }
-    return {attribute : bestSplit.attribute, predicate : bestSplit.predicate, pivot : bestSplit.pivot, match : buildTree(bestSplit.match, threshold, categoryAttr), notMatch : buildTree(bestSplit.notMatch, threshold, categoryAttr)};
+    return {attribute : bestSplit.attribute,
+            predicate : bestSplit.predicate,
+            pivot     : bestSplit.pivot,
+            match     : buildTree(bestSplit.match, threshold, categoryAttr),
+            notMatch  : buildTree(bestSplit.notMatch, threshold, categoryAttr)};
 }
 
 function predict(tree, item) {
@@ -123,9 +133,12 @@ function predict(tree, item) {
     
     var attrName = tree.attribute;
     var attrValue = item[attrName];
+    
     var predicateName = tree.predicate;
     var predicate = predicates[predicateName];
+    
     var pivot =  tree.pivot;
+    
     if((attrValue != null) && predicate(attrValue, pivot)) {
         return predict(tree.match, item);
     } else {
