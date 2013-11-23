@@ -111,7 +111,9 @@ function buildTree(items, threshold, categoryAttr) {
                 var matchEntropy = entropy(currSplit.match, categoryAttr);
                 var notMatchEntropy = entropy(currSplit.notMatch, categoryAttr);
                 
-                currSplit.gain = initialEntropy - (matchEntropy * currSplit.match.length + notMatchEntropy * currSplit.notMatch.length) / items.length;
+                var newEntropy = (matchEntropy * currSplit.match.length + notMatchEntropy * currSplit.notMatch.length) / items.length;
+                
+                currSplit.gain = initialEntropy - newEntropy;
                 
                 if(!bestSplit || (currSplit.gain > 0 && bestSplit.gain < currSplit.gain)) {
                     bestSplit = currSplit;
