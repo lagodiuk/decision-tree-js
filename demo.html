@@ -2,7 +2,9 @@
 
 <script type="text/javascript" src="decision-tree.js"></script>
 
+<!--
 <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+ -->
 
 <style>
 canvas {
@@ -140,8 +142,8 @@ TODO: http://stackoverflow.com/questions/1695115/how-do-i-draw-the-lines-of-a-fa
 
 <script type="text/javascript">
 
-google.load('visualization', '1', {packages:['orgchart']});
-google.setOnLoadCallback(init);
+//google.load('visualization', '1', {packages:['orgchart']});
+//google.setOnLoadCallback(init);
 
 function init() {
     
@@ -168,6 +170,7 @@ function init() {
         clearBtn = document.getElementById('clearBtn'),
         treeBlock = document.getElementById('treeDiv'),
         context = canv.getContext('2d'),
+        imageData = context.getImageData(0, 0, canv.width, canv.height),
         elements = [],
         color = colorSelect.options[colorSelect.selectedIndex].value,
         radius = 3,
@@ -201,10 +204,17 @@ function init() {
                 
                 // put pixel
                 var c = hexToRgb(predictedHexColor);
-                context.fillStyle = 'rgba(' + c.r + ',' + c.g + ',' + c.b + ',' + 0.5 + ')';
-                context.fillRect( x, y, 1, 1 );
+                //context.fillStyle = 'rgba(' + c.r + ',' + c.g + ',' + c.b + ',' + 0.5 + ')';
+                //context.fillRect( x, y, 1, 1 );
+                var indx = (y * canv.width + x) * 4;
+                imageData.data[indx + 0] = c.r;
+                imageData.data[indx + 1] = c.g;
+                imageData.data[indx + 2] = c.b;
+                imageData.data[indx + 3] = 128;
             }
         }
+        
+        context.putImageData(imageData, 0, 0);
     }
     
     function displayPoints() {
@@ -227,6 +237,7 @@ function init() {
             '</li></ul>';
     }
     
+    /*
     // For Google Org Chart
     // https://developers.google.com/chart/interactive/docs/gallery/orgchart
     function getTreeNodesDFS(tree, arr, parentID, counter) {
@@ -245,6 +256,7 @@ function init() {
         arr.push([{v: '' + (newCounter + 1) + '', f: 'false'}, '' + counter + '', 'notMatch']);
         return getTreeNodesDFS(tree.notMatch, arr, newCounter + 1, newCounter + 2);
     }
+     */
     
     var addingPoints = false;
     canv.addEventListener('mousedown',
@@ -269,7 +281,9 @@ function init() {
                             displayPoints();
                             treeBlock.width = 5000;
                           
-                            //treeBlock.innerHTML = treeToHtml(tree);
+                            treeBlock.innerHTML = treeToHtml(tree);
+                          
+                          /*
                             var arr = [];
                             getTreeNodesDFS(tree, arr, null, 0);
                             //alert(JSON.stringify(arr, null, 4));
@@ -287,6 +301,7 @@ function init() {
                             }
                             //alert(JSON.stringify(data, null, 4));
                             new google.visualization.OrgChart(treeBlock).draw(data, {allowHtml: true});
+                           */
                           },
                           false);
 
@@ -335,7 +350,7 @@ function init() {
 }
 </script>
 
-<body>
+<body onLoad="init()">
     
 	<select id="colorSelect">
 		<option value="#33CCFF">Blue</option>
@@ -347,7 +362,7 @@ function init() {
     
 	<br/>
     
-	<canvas id="myCanvas" width="200" height="200"></canvas>
+	<canvas id="myCanvas" width="400" height="400"></canvas>
     
     <br/>
     
