@@ -1,11 +1,5 @@
 <html>
 
-<script type="text/javascript" src="decision-tree.js"></script>
-
-<!--
-<script type="text/javascript" src="https://www.google.com/jsapi"></script>
- -->
-
 <style>
 canvas {
     border: 1px solid #ccc;
@@ -32,13 +26,17 @@ select {
  
 Source: http://thecodeplayer.com/walkthrough/css3-family-tree
 
-TODO: http://stackoverflow.com/questions/1695115/how-do-i-draw-the-lines-of-a-family-tree-using-html-css
+Some other advices about displaying trees: http://stackoverflow.com/questions/1695115/how-do-i-draw-the-lines-of-a-family-tree-using-html-css
 */
 
-* {margin: 0; padding: 0;}
+* {
+    margin: 0;
+    padding: 0;
+}
 
 .tree ul {
-	padding-top: 20px; position: relative;
+	padding-top: 20px;
+    position: relative;
 	
 	transition: all 0.5s;
 	-webkit-transition: all 0.5s;
@@ -46,7 +44,8 @@ TODO: http://stackoverflow.com/questions/1695115/how-do-i-draw-the-lines-of-a-fa
 }
 
 .tree li {
-	float: left; text-align: center;
+	float: left;
+    text-align: center;
 	list-style-type: none;
 	position: relative;
 	padding: 20px 5px 0 5px;
@@ -60,12 +59,16 @@ TODO: http://stackoverflow.com/questions/1695115/how-do-i-draw-the-lines-of-a-fa
 
 .tree li::before, .tree li::after{
 	content: '';
-	position: absolute; top: 0; right: 50%;
+	position: absolute;
+    top: 0;
+    right: 50%;
 	border-top: 1px solid #ccc;
-	width: 50%; height: 20px;
+	width: 50%;
+    height: 20px;
 }
 .tree li::after{
-	right: auto; left: 50%;
+	right: auto;
+    left: 50%;
 	border-left: 1px solid #ccc;
 }
 
@@ -76,7 +79,9 @@ TODO: http://stackoverflow.com/questions/1695115/how-do-i-draw-the-lines-of-a-fa
 }
 
 /*Remove space from the top of single children*/
-.tree li:only-child{ padding-top: 0;}
+.tree li:only-child{
+    padding-top: 0;
+}
 
 /*Remove left connector from first child and
  right connector from last child*/
@@ -99,9 +104,12 @@ TODO: http://stackoverflow.com/questions/1695115/how-do-i-draw-the-lines-of-a-fa
 /*Time to add downward connectors from parents*/
 .tree ul ul::before{
 	content: '';
-	position: absolute; top: 0; left: 50%;
+	position: absolute;
+    top: 0;
+    left: 50%;
 	border-left: 1px solid #ccc;
-	width: 0; height: 20px;
+	width: 0;
+    height: 20px;
 }
 
 .tree li a{
@@ -125,7 +133,9 @@ TODO: http://stackoverflow.com/questions/1695115/how-do-i-draw-the-lines-of-a-fa
 /*Time for some hover effects*/
 /*We will apply the hover effect the the lineage of the element also*/
 .tree li a:hover, .tree li a:hover+ul li a {
-	background: #c8e4f8; color: #000; border: 1px solid #94a0b4;
+	background: #c8e4f8;
+    color: #000;
+    border: 1px solid #94a0b4;
 }
 /*Connector styles on hover*/
 .tree li a:hover+ul li::after,
@@ -137,62 +147,69 @@ TODO: http://stackoverflow.com/questions/1695115/how-do-i-draw-the-lines-of-a-fa
 
 /*Thats all. I hope you enjoyed it.
  Thanks :)*/
-
 </style>
+
+<script type="text/javascript" src="decision-tree.js"></script>
 
 <script type="text/javascript">
 
-//google.load('visualization', '1', {packages:['orgchart']});
-//google.setOnLoadCallback(init);
+/*
+ * Taken from: http://stackoverflow.com/a/5624139/653511
+ */
+function hexToRgb(hex) {
+    // Expand shorthand form (e.g. "03F") to full form (e.g. "0033FF")
+    var shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
+    hex = hex.replace(shorthandRegex, function(m, r, g, b) {
+        return r + r + g + g + b + b;
+    });
+                      
+    var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result ? {
+        r: parseInt(result[1], 16),
+        g: parseInt(result[2], 16),
+        b: parseInt(result[3], 16)
+    } : null;
+}
+
+function drawCircle(context, x, y, radius, hexColor) {
+    context.beginPath();
+    context.arc(x, y, radius, 0, 2 * Math.PI, false);
+    
+    var c = hexToRgb(hexColor)
+    context.fillStyle = 'rgb(' + c.r + ',' + c.g + ',' + c.b + ')';
+    
+    context.fill();
+    context.closePath();
+    context.stroke();
+}
+
+function putPixel(imageData, width, x, y, hexColor, alpha) {
+    var c = hexToRgb(hexColor);
+    var indx = (y * width + x) * 4;
+    imageData.data[indx + 0] = c.r;
+    imageData.data[indx + 1] = c.g;
+    imageData.data[indx + 2] = c.b;
+    imageData.data[indx + 3] = alpha;
+}
 
 function init() {
     
-    //google.load('visualization', '1', {packages:['orgchart']});
+    var canv = document.getElementById('myCanvas');
+    var colorSelect = document.getElementById('colorSelect');
+    var clearBtn = document.getElementById('clearBtn');
+    var treeBlock = document.getElementById('treeDiv');
+    var context = canv.getContext('2d');
+    var imageData = context.getImageData(0, 0, canv.width, canv.height);
     
-    function hexToRgb(hex) {
-        // Expand shorthand form (e.g. "03F") to full form (e.g. "0033FF")
-        var shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
-        hex = hex.replace(shorthandRegex,
-                          function(m, r, g, b) {
-                            return r + r + g + g + b + b;
-                          });
-                          
-        var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-        return result ? {
-                            r: parseInt(result[1], 16),
-                            g: parseInt(result[2], 16),
-                            b: parseInt(result[3], 16)
-                        } : null;
-    }
-    
-    var canv = document.getElementById('myCanvas'),
-        colorSelect = document.getElementById('colorSelect'),
-        clearBtn = document.getElementById('clearBtn'),
-        treeBlock = document.getElementById('treeDiv'),
-        context = canv.getContext('2d'),
-        imageData = context.getImageData(0, 0, canv.width, canv.height),
-        elements = [],
-        color = colorSelect.options[colorSelect.selectedIndex].value,
-        radius = 3,
-        points = [],
-        tree = null;
+    var color = colorSelect.options[colorSelect.selectedIndex].value;
+    var POINT_RADIUS = 3;
+    var points = [];
+    var tree = null;
         
     // Default set of predicates is: '==', '>=' and '<='
     // But each point have only continuous attributes: x, y
     // So, we will use only '>=' and '<=' predicates
     delete predicates['=='];
-    
-    function drawCircle(x, y, hexColor) {
-        context.beginPath();
-        context.arc(x, y, radius, 0, 2 * Math.PI, false);
-
-        var c = hexToRgb(hexColor)
-        context.fillStyle = 'rgb(' + c.r + ',' + c.g + ',' + c.b + ')';
-        
-        context.fill();
-        context.closePath();
-        context.stroke();
-    }
     
     function displayTreePredictions() {
         context.clearRect ( 0 , 0 , canv.width , canv.height );
@@ -201,16 +218,7 @@ function init() {
             for(var y = 0; y < canv.height; y++) {
 
                 var predictedHexColor = predict(tree, {x : x, y : y});
-                
-                // put pixel
-                var c = hexToRgb(predictedHexColor);
-                //context.fillStyle = 'rgba(' + c.r + ',' + c.g + ',' + c.b + ',' + 0.5 + ')';
-                //context.fillRect( x, y, 1, 1 );
-                var indx = (y * canv.width + x) * 4;
-                imageData.data[indx + 0] = c.r;
-                imageData.data[indx + 1] = c.g;
-                imageData.data[indx + 2] = c.b;
-                imageData.data[indx + 3] = 128;
+                putPixel(imageData, canv.width, x, y, predictedHexColor, 128);
             }
         }
         
@@ -219,7 +227,7 @@ function init() {
     
     function displayPoints() {
         for(var p in points) {
-            drawCircle(points[p].x, points[p].y, points[p].color);
+            drawCircle(context, points[p].x, points[p].y, POINT_RADIUS, points[p].color);
         }
     }
     
@@ -236,27 +244,6 @@ function init() {
             '</ul>' +
             '</li></ul>';
     }
-    
-    /*
-    // For Google Org Chart
-    // https://developers.google.com/chart/interactive/docs/gallery/orgchart
-    function getTreeNodesDFS(tree, arr, parentID, counter) {
-        var parentIdStr = (parentID != null) ? '' + parentID + '' : null;
-        
-        if(tree.category) {
-            arr.push([{v: '' + counter + '', f: '' + tree.category + ''}, parentIdStr, 'leaf']);
-            return counter + 1;
-        }
-        
-        arr.push([{v: '' + counter + '', f: (tree.attribute + ' ' + tree.predicate + ' ' + tree.pivot)}, parentIdStr, 'rule']);
-        
-        arr.push([{v: '' + (counter + 1) + '', f: 'true'}, '' + counter + '', 'match']);
-        var newCounter = getTreeNodesDFS(tree.match, arr, counter + 1, counter + 2);
-        
-        arr.push([{v: '' + (newCounter + 1) + '', f: 'false'}, '' + counter + '', 'notMatch']);
-        return getTreeNodesDFS(tree.notMatch, arr, newCounter + 1, newCounter + 2);
-    }
-     */
     
     var addingPoints = false;
     canv.addEventListener('mousedown',
@@ -282,26 +269,6 @@ function init() {
                             treeBlock.width = 5000;
                           
                             treeBlock.innerHTML = treeToHtml(tree);
-                          
-                          /*
-                            var arr = [];
-                            getTreeNodesDFS(tree, arr, null, 0);
-                            //alert(JSON.stringify(arr, null, 4));
-                            var data = new google.visualization.DataTable();
-                            data.addColumn('string', 'a');
-                            data.addColumn('string', 'b');
-                            data.addColumn('string', 'c');
-                            data.addRows(arr);
-                            for(var i in arr) {
-                                if(arr[i][2] == 'leaf') {
-                                    data.setRowProperty(parseInt(i), 'style', 'background-color: ' + arr[i][0]['f']);
-                                } else {
-                                    data.setRowProperty(parseInt(i), 'style', 'border-radius: 5px 5px 5px 5px');
-                                }
-                            }
-                            //alert(JSON.stringify(data, null, 4));
-                            new google.visualization.OrgChart(treeBlock).draw(data, {allowHtml: true});
-                           */
                           },
                           false);
 
@@ -318,7 +285,7 @@ function init() {
                           
                             displayTreePredictions();
                             displayPoints();
-                            //treeBlock.innerHTML = treeToHtml(tree);
+                            treeBlock.innerHTML = treeToHtml(tree);
                           },
                           false);
     
@@ -327,7 +294,7 @@ function init() {
                             if(addingPoints) {
                                 var x = e.offsetX ? e.offsetX : (e.layerX - canv.offsetLeft);
                                 var y = e.offsetY ? e.offsetY : (e.layerY - canv.offsetTop );
-                                drawCircle(x, y, color);
+                                drawCircle(context, x, y, POINT_RADIUS, color);
                                 points.push({x : x, y : y, color : color});
                             }
                           },
