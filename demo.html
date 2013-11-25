@@ -1,6 +1,8 @@
 <html>
 
-<script src="decision-tree.js"></script>
+<script type="text/javascript" src="decision-tree.js"></script>
+
+<script type="text/javascript" src="https://www.google.com/jsapi"></script>
 
 <style>
 canvas {
@@ -136,8 +138,14 @@ TODO: http://stackoverflow.com/questions/1695115/how-do-i-draw-the-lines-of-a-fa
 
 </style>
 
-<script>
+<script type="text/javascript">
+
+google.load('visualization', '1', {packages:['orgchart']});
+google.setOnLoadCallback(init);
+
 function init() {
+    
+    //google.load('visualization', '1', {packages:['orgchart']});
     
     function hexToRgb(hex) {
         // Expand shorthand form (e.g. "03F") to full form (e.g. "0033FF")
@@ -219,6 +227,25 @@ function init() {
             '</li></ul>';
     }
     
+    // For Google Org Chart
+    // https://developers.google.com/chart/interactive/docs/gallery/orgchart
+    function getTreeNodesDFS(tree, arr, parentID, counter) {
+        var parentIdStr = (parentID != null) ? '' + parentID + '' : null;
+        
+        if(tree.category) {
+            arr.push([{v: '' + counter + '', f: '' + tree.category + ''}, parentIdStr, 'leaf']);
+            return counter + 1;
+        }
+        
+        arr.push([{v: '' + counter + '', f: (tree.attribute + ' ' + tree.predicate + ' ' + tree.pivot)}, parentIdStr, 'rule']);
+        
+        arr.push([{v: '' + (counter + 1) + '', f: 'true'}, '' + counter + '', 'match']);
+        var newCounter = getTreeNodesDFS(tree.match, arr, counter + 1, counter + 2);
+        
+        arr.push([{v: '' + (newCounter + 1) + '', f: 'false'}, '' + counter + '', 'notMatch']);
+        return getTreeNodesDFS(tree.notMatch, arr, newCounter + 1, newCounter + 2);
+    }
+    
     var addingPoints = false;
     canv.addEventListener('mousedown',
                           function(e) {
@@ -241,7 +268,25 @@ function init() {
                             displayTreePredictions();
                             displayPoints();
                             treeBlock.width = 5000;
-                            treeBlock.innerHTML = treeToHtml(tree);
+                          
+                            //treeBlock.innerHTML = treeToHtml(tree);
+                            var arr = [];
+                            getTreeNodesDFS(tree, arr, null, 0);
+                            //alert(JSON.stringify(arr, null, 4));
+                            var data = new google.visualization.DataTable();
+                            data.addColumn('string', 'a');
+                            data.addColumn('string', 'b');
+                            data.addColumn('string', 'c');
+                            data.addRows(arr);
+                            for(var i in arr) {
+                                if(arr[i][2] == 'leaf') {
+                                    data.setRowProperty(parseInt(i), 'style', 'background-color: ' + arr[i][0]['f']);
+                                } else {
+                                    data.setRowProperty(parseInt(i), 'style', 'border-radius: 5px 5px 5px 5px');
+                                }
+                            }
+                            //alert(JSON.stringify(data, null, 4));
+                            new google.visualization.OrgChart(treeBlock).draw(data, {allowHtml: true});
                           },
                           false);
 
@@ -258,7 +303,7 @@ function init() {
                           
                             displayTreePredictions();
                             displayPoints();
-                            treeBlock.innerHTML = treeToHtml(tree);
+                            //treeBlock.innerHTML = treeToHtml(tree);
                           },
                           false);
     
@@ -290,7 +335,7 @@ function init() {
 }
 </script>
 
-<body onload="init()">
+<body>
     
 	<select id="colorSelect">
 		<option value="#33CCFF">Blue</option>
