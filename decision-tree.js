@@ -1,5 +1,4 @@
 function countUniqueAttributes(items, attr) {
-    //var counter = items.reduce(function(acc, item) { acc[item[categoryAttr]] = acc[item[categoryAttr]] ? acc[item[categoryAttr]] + 1 : 1; return acc }, {});
     var counter = {};
     
     for(var i in items) {
@@ -78,19 +77,27 @@ function mostFrequentCategory(items, attr) {
     return mostFrequentCategory;
 }
 
-var ENTROPY_THRESHOLD = 0.001;
+function buildDecisionTree(builder) {
+    
+    var items = builder.trainingSet;
+    var threshold = builder.minItemsCount;
+    var categoryAttr = builder.categoryAttr;
+    var entropyThrehold = builder.entropyThrehold;
 
-function buildTree(items, threshold, categoryAttr) {
+    // Default values
     if(!categoryAttr) {
         categoryAttr = 'category';
     }
     if(!threshold) {
         threshold = 1;
     }
+    if(!entropyThrehold) {
+        entropyThrehold = 0.0001;
+    }
     
     var initialEntropy = entropy(items, categoryAttr);
     
-    if((initialEntropy < ENTROPY_THRESHOLD) || (items.length <= threshold)) {
+    if((initialEntropy < entropyThrehold) || (items.length <= threshold)) {
         return {category : mostFrequentCategory(items, categoryAttr)}
     };
     
@@ -111,7 +118,10 @@ function buildTree(items, threshold, categoryAttr) {
                 var matchEntropy = entropy(currSplit.match, categoryAttr);
                 var notMatchEntropy = entropy(currSplit.notMatch, categoryAttr);
                 
-                var newEntropy = (matchEntropy * currSplit.match.length + notMatchEntropy * currSplit.notMatch.length) / items.length;
+                var newEntropy = 0;
+                newEntropy += matchEntropy * currSplit.match.length;
+                newEntropy += notMatchEntropy * currSplit.notMatch.length;
+                newEntropy /= items.length;
                 
                 currSplit.gain = initialEntropy - newEntropy;
                 
@@ -124,8 +134,18 @@ function buildTree(items, threshold, categoryAttr) {
     return {attribute : bestSplit.attribute,
             predicate : bestSplit.predicate,
             pivot     : bestSplit.pivot,
-            match     : buildTree(bestSplit.match, threshold, categoryAttr),
-            notMatch  : buildTree(bestSplit.notMatch, threshold, categoryAttr)};
+            match     : buildDecisionTree({
+                                            trainingSet : bestSplit.match,
+                                            minItemsCount : threshold,
+                                            categoryAttr : categoryAttr,
+                                            entropyThrehold : entropyThrehold
+                                          }),
+            notMatch  : buildDecisionTree({
+                                            trainingSet : bestSplit.notMatch,
+                                            minItemsCount : threshold,
+                                            categoryAttr : categoryAttr,
+                                            entropyThrehold : entropyThrehold
+                                          })};
 }
 
 function predict(tree, item) {
@@ -147,35 +167,3 @@ function predict(tree, item) {
         return predict(tree.notMatch, item);
     }
 }
-
-
-
-/*
-var points = []
-for(var i = 0; i < 150; i++) {
-    var x = (Math.random() - Math.random()) * 10;
-    var y = (Math.random() - Math.random()) * 10;
-    var pt = {x : x, y : y}
-    if(x * x + y * y < 5 * 5) pt.category = 'in_circle'; else pt.category = 'out_of_circle';
-    points.push(pt)
-}
-var tree = buildTree(points, 5);
-alert(JSON.stringify(tree, null, 4))
-var pt = {x : 0, y : 0};
-pt.prediction = predict(tree, pt);
-alert(JSON.stringify(pt, null, 4))
-pt = {x : 7, y : 7};
-pt.prediction = predict(tree, pt);
-alert(JSON.stringify(pt, null, 4))
-
-var stat = {correct : 0, incorrect : 0}
-for(var i = 0; i < 1000; i++) {
-    var x = (Math.random() - Math.random()) * 10;
-    var y = (Math.random() - Math.random()) * 10;
-    var pt = {x : x, y : y}
-    pt.prediction = predict(tree, pt);
-    if(x * x + y * y < 5 * 5) pt.c = 'in_circle'; else pt.c = 'out_of_circle';
-    if(pt.c == pt.prediction) stat.correct++; else stat.incorrect++;
-}
-alert(JSON.stringify(stat, null, 4))
-*/

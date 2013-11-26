@@ -262,7 +262,9 @@ function init() {
                             var threshold = points.length / 100;
                             threshold = (threshold > 1) ? threshold : 1;
                           
-                            tree = buildTree(points, threshold, 'color');
+                            tree = buildDecisionTree({  trainingSet : points,
+                                                        minItemsCount : threshold,
+                                                        categoryAttr : 'color'});
                           
                             displayTreePredictions();
                             displayPoints();
@@ -281,7 +283,9 @@ function init() {
                             var threshold = points.length / 100;
                             threshold = (threshold > 1) ? threshold : 1;
                           
-                            tree = buildTree(points, threshold, 'color');
+                            tree = buildDecisionTree({  trainingSet : points,
+                                                        minItemsCount : threshold,
+                                                        categoryAttr : 'color'});
                           
                             displayTreePredictions();
                             displayPoints();
