@@ -187,10 +187,13 @@ function drawCircle(context, x, y, radius, hexColor) {
 function putPixel(imageData, width, x, y, hexColor, alpha) {
     var c = hexToRgb(hexColor);
     var indx = (y * width + x) * 4;
-    imageData.data[indx + 0] = c.r;
-    imageData.data[indx + 1] = c.g;
-    imageData.data[indx + 2] = c.b;
-    imageData.data[indx + 3] = alpha;
+    
+    var currAlpha = imageData.data[indx + 3];
+    
+    imageData.data[indx + 0] = (c.r * alpha + imageData.data[indx + 0] * currAlpha) / (alpha + currAlpha);
+    imageData.data[indx + 1] = (c.g * alpha + imageData.data[indx + 1] * currAlpha) / (alpha + currAlpha);
+    imageData.data[indx + 2] = (c.b * alpha + imageData.data[indx + 2] * currAlpha) / (alpha + currAlpha);
+    imageData.data[indx + 3] = alpha + currAlpha;
 }
 
 function init() {
@@ -200,12 +203,13 @@ function init() {
     var clearBtn = document.getElementById('clearBtn');
     var treeBlock = document.getElementById('treeDiv');
     var context = canv.getContext('2d');
-    var imageData = context.getImageData(0, 0, canv.width, canv.height);
     
     var color = colorSelect.options[colorSelect.selectedIndex].value;
     var POINT_RADIUS = 3;
     var points = [];
     var tree = null;
+    var forest = null;
+    var TREES_NUMBER = 7;
         
     // Default set of predicates is: '==', '>=' and '<='
     // But each point have only continuous attributes: x, y
@@ -215,11 +219,26 @@ function init() {
     function displayTreePredictions() {
         context.clearRect ( 0 , 0 , canv.width , canv.height );
         
+        var imageData = context.getImageData(0, 0, canv.width, canv.height);
+        
         for(var x = 0; x < canv.width; x++) {
             for(var y = 0; y < canv.height; y++) {
-
+                
+                /*
                 var predictedHexColor = predict(tree, {x : x, y : y});
                 putPixel(imageData, canv.width, x, y, predictedHexColor, 128);
+                 */
+                
+                
+                var prediction = predictRandomForest(forest, {x : x, y : y});
+                var sum = 0;
+                for(var hexColor in prediction) {
+                    sum += prediction[hexColor];
+                }
+                
+                for(var hexColor in prediction) {
+                    putPixel(imageData, canv.width, x, y, hexColor, prediction[hexColor] * 128 / sum);
+                }
             }
         }
         
@@ -256,6 +275,8 @@ function init() {
     
     canv.addEventListener('mouseup',
                           function(e) {
+                            if(!addingPoints) return;
+                          
                             if(points.length == 0) return;
                           
                             addingPoints = false;
@@ -263,20 +284,30 @@ function init() {
                             var threshold = points.length / 100;
                             threshold = (threshold > 1) ? threshold : 1;
                           
-                            tree = buildDecisionTree({  trainingSet : points,
+                            tree = buildDecisionTree({
+                                                        trainingSet : points,
                                                         minItemsCount : threshold,
-                                                        categoryAttr : 'color'});
+                                                        categoryAttr : 'color'
+                                                     });
+
+                            forest = buildRandomForest({
+                                                        trainingSet : points,
+                                                        categoryAttr : 'color',
+                                                        treesNumber : TREES_NUMBER
+                                                       });
                           
                             displayTreePredictions();
                             displayPoints();
                             treeBlock.width = 5000;
                           
-                            treeBlock.innerHTML = treeToHtml(tree);
+                            //treeBlock.innerHTML = treeToHtml(tree);
                           },
                           false);
 
     canv.addEventListener('mouseout',
                           function(e) {
+                            if(!addingPoints) return;
+                          
                             if(points.length == 0) return;
                           
                             addingPoints = false;
@@ -284,13 +315,21 @@ function init() {
                             var threshold = points.length / 100;
                             threshold = (threshold > 1) ? threshold : 1;
                           
-                            tree = buildDecisionTree({  trainingSet : points,
-                                                        minItemsCount : threshold,
-                                                        categoryAttr : 'color'});
+                            tree = buildDecisionTree({
+                                trainingSet : points,
+                                minItemsCount : threshold,
+                                categoryAttr : 'color'
+                            });
+
+                            forest = buildRandomForest({
+                                trainingSet : points,
+                                categoryAttr : 'color',
+                                treesNumber : TREES_NUMBER
+                            });
                           
                             displayTreePredictions();
                             displayPoints();
-                            treeBlock.innerHTML = treeToHtml(tree);
+                            //treeBlock.innerHTML = treeToHtml(tree);
                           },
                           false);
     

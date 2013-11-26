@@ -131,6 +131,12 @@ function buildDecisionTree(builder) {
             }
         }
     }
+    
+    if(currSplit.gain <= 0) {
+        // Can't find optimal split
+        return {category : mostFrequentCategory(items, categoryAttr)}
+    }
+    
     return {attribute : bestSplit.attribute,
             predicate : bestSplit.predicate,
             pivot     : bestSplit.pivot,
@@ -166,4 +172,48 @@ function predict(tree, item) {
     } else {
         return predict(tree.notMatch, item);
     }
+}
+
+function buildRandomForest(builder) {
+    var items = builder.trainingSet;
+    var categoryAttr = builder.categoryAttr;
+    var treesNumber = builder.treesNumber;
+    
+    var forest = [];
+    
+    for(var t = 0; t < treesNumber - 1; t++) {
+        
+        var treeBuilder = {
+            trainingSet : []
+        };
+        
+        for(var i in items) {
+            if(Math.random() < 0.5) {
+                continue;
+            }
+            treeBuilder.trainingSet.push(items[i]);
+        }
+        
+        if(categoryAttr) {
+            treeBuilder.categoryAttr = categoryAttr;
+        }
+        
+        var tree = buildDecisionTree(treeBuilder);
+        forest.push(tree);
+    }
+    return forest;
+}
+
+function predictRandomForest(forest, item) {
+    var result = {};
+    for(var i in forest) {
+        var tree = forest[i];
+        var prediction = predict(tree, item);
+        if(result[prediction]) {
+            result[prediction] += 1;
+        } else {
+            result[prediction] = 1;
+        }
+    }
+    return result;
 }
