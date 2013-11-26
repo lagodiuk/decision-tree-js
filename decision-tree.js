@@ -83,6 +83,7 @@ function buildDecisionTree(builder) {
     var threshold = builder.minItemsCount;
     var categoryAttr = builder.categoryAttr;
     var entropyThrehold = builder.entropyThrehold;
+    var maxTreeDepth = builder.maxTreeDepth;
 
     // Default values
     if(!categoryAttr) {
@@ -92,12 +93,15 @@ function buildDecisionTree(builder) {
         threshold = 1;
     }
     if(!entropyThrehold) {
-        entropyThrehold = 0.0001;
+        entropyThrehold = 0.01;
+    }
+    if(!maxTreeDepth) {
+        maxTreeDepth = 70;
     }
     
     var initialEntropy = entropy(items, categoryAttr);
     
-    if((initialEntropy < entropyThrehold) || (items.length <= threshold)) {
+    if((maxTreeDepth == 0) || (initialEntropy < entropyThrehold) || (items.length <= threshold)) {
         return {category : mostFrequentCategory(items, categoryAttr)}
     };
     
@@ -144,13 +148,15 @@ function buildDecisionTree(builder) {
                                             trainingSet : bestSplit.match,
                                             minItemsCount : threshold,
                                             categoryAttr : categoryAttr,
-                                            entropyThrehold : entropyThrehold
+                                            entropyThrehold : entropyThrehold,
+                                            maxTreeDepth : maxTreeDepth - 1
                                           }),
             notMatch  : buildDecisionTree({
                                             trainingSet : bestSplit.notMatch,
                                             minItemsCount : threshold,
                                             categoryAttr : categoryAttr,
-                                            entropyThrehold : entropyThrehold
+                                            entropyThrehold : entropyThrehold,
+                                            maxTreeDepth : maxTreeDepth - 1
                                           })};
 }
 
@@ -174,10 +180,29 @@ function predict(tree, item) {
     }
 }
 
+// Taken from: http://stackoverflow.com/a/6274398/653511
+function shuffle(array) {
+    var counter = array.length, temp, index;
+    
+    // While there are elements in the array
+    while (counter--) {
+        // Pick a random index
+        index = (Math.random() * counter) | 0;
+        
+        // And swap the last element with it
+        temp = array[counter];
+        array[counter] = array[index];
+        array[index] = temp;
+    }
+    
+    return array;
+}
+
 function buildRandomForest(builder) {
-    var items = builder.trainingSet;
+    var items = shuffle(builder.trainingSet);
     var categoryAttr = builder.categoryAttr;
     var treesNumber = builder.treesNumber;
+    var maxTreeDepth = builder.maxTreeDepth;
     
     var forest = [];
     
@@ -187,20 +212,31 @@ function buildRandomForest(builder) {
             trainingSet : []
         };
         
-        for(var i in items) {
-            if(Math.random() < 0.5) {
-                continue;
+        for(var i = 1; i <= items.length; i++) {
+            if((i / (t + 2) == 0) || (Math.random() < 0.4)) {
+                treeBuilder.trainingSet.push(items[i - 1]);
             }
-            treeBuilder.trainingSet.push(items[i]);
         }
         
         if(categoryAttr) {
             treeBuilder.categoryAttr = categoryAttr;
         }
         
+        if(!maxTreeDepth) {
+            treeBuilder.maxTreeDepth = 20;
+        }
+        
         var tree = buildDecisionTree(treeBuilder);
         forest.push(tree);
     }
+    
+    var tree = buildDecisionTree({
+        trainingSet : builder.trainingSet,
+        categoryAttr : builder.categoryAttr
+    });
+    
+    forest.push(tree);
+    
     return forest;
 }
 
