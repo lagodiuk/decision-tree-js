@@ -136,7 +136,7 @@ function buildDecisionTree(builder) {
         }
     }
     
-    if(currSplit.gain <= 0) {
+    if(bestSplit.gain <= 0) {
         // Can't find optimal split
         return {category : mostFrequentCategory(items, categoryAttr)}
     }
@@ -180,40 +180,22 @@ function predict(tree, item) {
     }
 }
 
-// Taken from: http://stackoverflow.com/a/6274398/653511
-function shuffle(array) {
-    var counter = array.length, temp, index;
-    
-    // While there are elements in the array
-    while (counter--) {
-        // Pick a random index
-        index = (Math.random() * counter) | 0;
-        
-        // And swap the last element with it
-        temp = array[counter];
-        array[counter] = array[index];
-        array[index] = temp;
-    }
-    
-    return array;
-}
-
 function buildRandomForest(builder) {
-    var items = shuffle(builder.trainingSet);
+    var items = builder.trainingSet;
     var categoryAttr = builder.categoryAttr;
     var treesNumber = builder.treesNumber;
     var maxTreeDepth = builder.maxTreeDepth;
     
     var forest = [];
     
-    for(var t = 0; t < treesNumber - 1; t++) {
+    for(var t = 0; t < treesNumber; t++) {
         
         var treeBuilder = {
             trainingSet : []
         };
         
         for(var i = 1; i <= items.length; i++) {
-            if((i / (t + 2) == 0) || (Math.random() < 0.4)) {
+            if(i % (t + 2) == 0) {
                 treeBuilder.trainingSet.push(items[i - 1]);
             }
         }
@@ -222,21 +204,13 @@ function buildRandomForest(builder) {
             treeBuilder.categoryAttr = categoryAttr;
         }
         
-        if(!maxTreeDepth) {
-            treeBuilder.maxTreeDepth = 20;
+        if(maxTreeDepth) {
+            treeBuilder.maxTreeDepth = maxTreeDepth;
         }
         
         var tree = buildDecisionTree(treeBuilder);
         forest.push(tree);
     }
-    
-    var tree = buildDecisionTree({
-        trainingSet : builder.trainingSet,
-        categoryAttr : builder.categoryAttr
-    });
-    
-    forest.push(tree);
-    
     return forest;
 }
 
