@@ -6,8 +6,11 @@ canvas {
     margin: 30px;
 }
 
-select {
+.color-select {
     margin: 30px;
+    width : 30px;
+    height : 30px;
+    display:inline-block;
 }
 
 /*
@@ -199,12 +202,16 @@ function putPixel(imageData, width, x, y, hexColor, alpha) {
 function init() {
     
     var canv = document.getElementById('myCanvas');
-    var colorSelect = document.getElementById('colorSelect');
     var clearBtn = document.getElementById('clearBtn');
     var treeBlock = document.getElementById('treeDiv');
     var context = canv.getContext('2d');
     
-    var color = colorSelect.options[colorSelect.selectedIndex].value;
+    var colorSelectElements = document.getElementsByClassName('color-select');
+    for(var i = 0; i < colorSelectElements.length; i++) {
+        colorSelectElements[i].style.backgroundColor = colorSelectElements[i].getAttribute('label');
+    }
+
+    var color = colorSelectElements[0].getAttribute('label');;
     var POINT_RADIUS = 3;
     var points = [];
     var tree = null;
@@ -253,7 +260,7 @@ function init() {
     
     function treeToHtml(tree) {
         if (tree.category) {
-            return '<ul><li><a href="#" style="background-color:' + tree.category + '">Color</a></li></ul>';
+            return '<ul><li><a href="#" style="background-color:' + tree.category + '">&nbsp;</a></li></ul>';
         }
         
         return '<ul><li>' +
@@ -344,12 +351,14 @@ function init() {
                           },
                           false);
 
-    colorSelect.addEventListener('change',
-                                 function(event) {
-                                    var selected = colorSelect.selectedIndex;
-                                    color = colorSelect.options[selected].value;
-                                 },
-                                 false);
+
+    for(var i = 0; i < colorSelectElements.length; i++) {
+        colorSelectElements[i].addEventListener('click',
+                                                function(event) {
+                                                    color = this.getAttribute('label');
+                                                },
+                                                false);
+    }
 
     clearBtn.addEventListener('click',
                               function(event) {
@@ -363,11 +372,10 @@ function init() {
 
 <body onLoad="init()">
     
-	<select id="colorSelect">
-		<option value="#33CCFF">Blue</option>
-		<option value="#FF6600">Red</option>
-        <option value="#009933">Green</option>
-	</select>
+    <div class="color-select" label="#33CCFF">&nbsp;</div>
+    <div class="color-select" label="#009933">&nbsp;</div>
+    <div class="color-select" label="#FF6600">&nbsp;</div>
+    
     
 	<button id="clearBtn">clear</button>
     
