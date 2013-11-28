@@ -105,7 +105,9 @@ function buildDecisionTree(builder) {
         return {category : mostFrequentCategory(items, categoryAttr)}
     };
     
-    var bestSplit;
+    var bestSplit = {
+        gain : 0
+    };
     
     for(var i in items) {
         var item = items[i];
@@ -129,7 +131,7 @@ function buildDecisionTree(builder) {
                 
                 currSplit.gain = initialEntropy - newEntropy;
                 
-                if(!bestSplit || (currSplit.gain > 0 && bestSplit.gain < currSplit.gain)) {
+                if(currSplit.gain > 0 && bestSplit.gain < currSplit.gain) {
                     bestSplit = currSplit;
                 }
             }
