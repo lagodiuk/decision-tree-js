@@ -217,11 +217,6 @@ function init() {
     var tree = null;
     var forest = null;
     var TREES_NUMBER = 7;
-        
-    // Default set of predicates is: '==', '>=' and '<='
-    // But each point have only continuous attributes: x, y
-    // So, we will use only '>=' and '<=' predicates
-    delete predicates['=='];
     
     function displayTreePredictions() {
         context.clearRect ( 0 , 0 , canv.width , canv.height );
@@ -237,7 +232,7 @@ function init() {
                  */
                 
                 
-                var prediction = predictRandomForest(forest, {x : x, y : y});
+                var prediction = forest.predict({x : x, y : y});
                 var sum = 0;
                 for(var hexColor in prediction) {
                     sum += prediction[hexColor];
@@ -297,11 +292,11 @@ function init() {
                                                         categoryAttr : 'color'
                                                      });
                              */
-                            forest = buildRandomForest({
+                            forest = new RandomForest({
                                                         trainingSet : points,
                                                         categoryAttr : 'color',
-                                                        treesNumber : TREES_NUMBER
-                                                       });
+                                                      removeDefaultPredicates : ['==']
+                                                       }, TREES_NUMBER);
                           
                             displayTreePredictions();
                             displayPoints();
@@ -328,11 +323,11 @@ function init() {
                                 categoryAttr : 'color'
                             });
                              */
-                            forest = buildRandomForest({
-                                trainingSet : points,
-                                categoryAttr : 'color',
-                                treesNumber : TREES_NUMBER
-                            });
+                          forest = new RandomForest({
+                                                    trainingSet : points,
+                                                    categoryAttr : 'color',
+                                                    removeDefaultPredicates : ['==']
+                                                    }, TREES_NUMBER);
                           
                             displayTreePredictions();
                             displayPoints();
