@@ -129,27 +129,21 @@ var dt = (function () {
             }
         }
 
+        builder.maxTreeDepth = maxTreeDepth - 1;
+          
+        builder.trainingSet = bestSplit.match;
+        var matchSubTree = buildDecisionTree(builder);
+          
+        builder.trainingSet = bestSplit.notMatch;
+        var notMatchSubTree = buildDecisionTree(builder);
+          
         return {
             attribute: bestSplit.attribute,
             predicate: bestSplit.predicate,
             predicateName: bestSplit.predicateName,
             pivot: bestSplit.pivot,
-            match: buildDecisionTree({
-                trainingSet: bestSplit.match,
-                minItemsCount: minItemsCount,
-                categoryAttr: categoryAttr,
-                entropyThrehold: entropyThrehold,
-                maxTreeDepth: maxTreeDepth - 1,
-                predicates: predicates
-            }),
-            notMatch: buildDecisionTree({
-                trainingSet: bestSplit.notMatch,
-                minItemsCount: minItemsCount,
-                categoryAttr: categoryAttr,
-                entropyThrehold: entropyThrehold,
-                maxTreeDepth: maxTreeDepth - 1,
-                predicates: predicates
-            })
+            match: matchSubTree,
+            notMatch: notMatchSubTree
         };
     }
 
