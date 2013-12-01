@@ -160,63 +160,65 @@ Some other advices about displaying trees: http://stackoverflow.com/questions/16
 /*
  * Taken from: http://stackoverflow.com/a/5624139/653511
  */
-function hexToRgb(hex) {
-    // Expand shorthand form (e.g. "03F") to full form (e.g. "0033FF")
-    var shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
-    hex = hex.replace(shorthandRegex, function(m, r, g, b) {
-        return r + r + g + g + b + b;
-    });
-                      
-    var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-    return result ? {
-        r: parseInt(result[1], 16),
-        g: parseInt(result[2], 16),
-        b: parseInt(result[3], 16)
-    } : null;
-}
-
-function drawCircle(context, x, y, radius, hexColor) {
-    context.beginPath();
-    context.arc(x, y, radius, 0, 2 * Math.PI, false);
-    
-    var c = hexToRgb(hexColor)
-    context.fillStyle = 'rgb(' + c.r + ',' + c.g + ',' + c.b + ')';
-    
-    context.fill();
-    context.closePath();
-    context.stroke();
-}
-
-function putPixel(imageData, width, x, y, hexColor, alpha) {
-    var c = hexToRgb(hexColor);
-    var indx = (y * width + x) * 4;
-    
-    var currAlpha = imageData.data[indx + 3];
-    
-    imageData.data[indx + 0] = (c.r * alpha + imageData.data[indx + 0] * currAlpha) / (alpha + currAlpha);
-    imageData.data[indx + 1] = (c.g * alpha + imageData.data[indx + 1] * currAlpha) / (alpha + currAlpha);
-    imageData.data[indx + 2] = (c.b * alpha + imageData.data[indx + 2] * currAlpha) / (alpha + currAlpha);
-    imageData.data[indx + 3] = alpha + currAlpha;
-}
-
 function init() {
+    
+    function hexToRgb(hex) {
+        // Expand shorthand form (e.g. "03F") to full form (e.g. "0033FF")
+        var shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
+        hex = hex.replace(shorthandRegex, function(m, r, g, b) {
+                          return r + r + g + g + b + b;
+                          });
+                          
+                          var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+                          return result ? {
+                              r: parseInt(result[1], 16),
+                              g: parseInt(result[2], 16),
+                              b: parseInt(result[3], 16)
+                          } : null;
+    }
+    
+    function drawCircle(context, x, y, radius, hexColor) {
+        context.beginPath();
+        context.arc(x, y, radius, 0, 2 * Math.PI, false);
+        
+        var c = hexToRgb(hexColor)
+        context.fillStyle = 'rgb(' + c.r + ',' + c.g + ',' + c.b + ')';
+        
+        context.fill();
+        context.closePath();
+        context.stroke();
+    }
+    
+    function putPixel(imageData, width, x, y, hexColor, alpha) {
+        var c = hexToRgb(hexColor);
+        var indx = (y * width + x) * 4;
+        
+        var currAlpha = imageData.data[indx + 3];
+        
+        imageData.data[indx + 0] = (c.r * alpha + imageData.data[indx + 0] * currAlpha) / (alpha + currAlpha);
+        imageData.data[indx + 1] = (c.g * alpha + imageData.data[indx + 1] * currAlpha) / (alpha + currAlpha);
+        imageData.data[indx + 2] = (c.b * alpha + imageData.data[indx + 2] * currAlpha) / (alpha + currAlpha);
+        imageData.data[indx + 3] = alpha + currAlpha;
+    }
     
     var canv = document.getElementById('myCanvas');
     var clearBtn = document.getElementById('clearBtn');
     var treeBlock = document.getElementById('treeDiv');
+    var infoBlock = document.getElementById('infoDiv');
     var context = canv.getContext('2d');
     
     var colorSelectElements = document.getElementsByClassName('color-select');
     for(var i = 0; i < colorSelectElements.length; i++) {
         colorSelectElements[i].style.backgroundColor = colorSelectElements[i].getAttribute('label');
+        colorSelectElements[i].style.border = '2px solid white';
     }
 
-    var color = colorSelectElements[0].getAttribute('label');;
+    var color = colorSelectElements[0].getAttribute('label');
+    colorSelectElements[0].style.border = '2px solid black';
     var POINT_RADIUS = 3;
     var points = [];
-    var tree = null;
     var forest = null;
-    var TREES_NUMBER = 7;
+    var TREES_NUMBER = 11;
     
     function displayTreePredictions() {
         context.clearRect ( 0 , 0 , canv.width , canv.height );
@@ -225,12 +227,6 @@ function init() {
         
         for(var x = 0; x < canv.width; x++) {
             for(var y = 0; y < canv.height; y++) {
-                
-                /*
-                var predictedHexColor = predict(tree, {x : x, y : y});
-                putPixel(imageData, canv.width, x, y, predictedHexColor, 128);
-                 */
-                
                 
                 var prediction = forest.predict({x : x, y : y});
                 var sum = 0;
@@ -274,66 +270,40 @@ function init() {
                             addingPoints = true;
                           },
                           false);
+                          
+                    function rebuildForestListener(e) {
+                        
+                        if(!addingPoints) return;
+                        
+                        if(points.length == 0) return;
+                        
+                        addingPoints = false;
+                        
+                        //infoDiv.innerHTML = 'Building random forest';
+                        
+                        //setTimeout(function() {
+                                          
+                                          var threshold = Math.floor(points.length / 100);
+                                          threshold = (threshold > 1) ? threshold : 1;
+                                   
+                                          forest = new dt.RandomForest({
+                                                                       trainingSet : points,
+                                                                       categoryAttr : 'color',
+                                                                       removeDefaultPredicates : ['==', '<='],
+                                                                       minItemsCount : threshold
+                                                                       }, TREES_NUMBER);
+                                          
+                                          displayTreePredictions();
+                                          displayPoints();
+                                          
+                                          //infoDiv.innerHTML = 'Size of training set: ' + points.length;
+                                          
+                                          //}, 10);
+                          }
     
-    canv.addEventListener('mouseup',
-                          function(e) {
-                            if(!addingPoints) return;
-                          
-                            if(points.length == 0) return;
-                          
-                            addingPoints = false;
-                          
-                            var threshold = points.length / 100;
-                            threshold = (threshold > 1) ? threshold : 1;
-                            /*
-                            tree = buildDecisionTree({
-                                                        trainingSet : points,
-                                                        minItemsCount : threshold,
-                                                        categoryAttr : 'color'
-                                                     });
-                             */
-                            forest = new dt.RandomForest({
-                                                        trainingSet : points,
-                                                        categoryAttr : 'color',
-                                                      removeDefaultPredicates : ['==']
-                                                       }, TREES_NUMBER);
-                          
-                            displayTreePredictions();
-                            displayPoints();
-                            treeBlock.width = 5000;
-                          
-                            //treeBlock.innerHTML = treeToHtml(tree);
-                          },
-                          false);
+    canv.addEventListener('mouseup', rebuildForestListener, false);
 
-    canv.addEventListener('mouseout',
-                          function(e) {
-                            if(!addingPoints) return;
-                          
-                            if(points.length == 0) return;
-                          
-                            addingPoints = false;
-                          
-                            var threshold = points.length / 100;
-                            threshold = (threshold > 1) ? threshold : 1;
-                            /*
-                            tree = buildDecisionTree({
-                                trainingSet : points,
-                                minItemsCount : threshold,
-                                categoryAttr : 'color'
-                            });
-                             */
-                          forest = new dt.RandomForest({
-                                                    trainingSet : points,
-                                                    categoryAttr : 'color',
-                                                    removeDefaultPredicates : ['==']
-                                                    }, TREES_NUMBER);
-                          
-                            displayTreePredictions();
-                            displayPoints();
-                            //treeBlock.innerHTML = treeToHtml(tree);
-                          },
-                          false);
+    canv.addEventListener('mouseout', rebuildForestListener, false);
     
     canv.addEventListener('mousemove',
                           function(e) {
@@ -351,6 +321,10 @@ function init() {
         colorSelectElements[i].addEventListener('click',
                                                 function(event) {
                                                     color = this.getAttribute('label');
+                                                    for(var i = 0; i < colorSelectElements.length; i++) {
+                                                        colorSelectElements[i].style.border = '2px solid white';
+                                                    }
+                                                    this.style.border = '2px solid black';
                                                 },
                                                 false);
     }
@@ -373,6 +347,10 @@ function init() {
     
     
 	<button id="clearBtn">clear</button>
+    
+    <br/>
+    
+    <div class="tree" id="infoDiv"></div>
     
 	<br/>
     

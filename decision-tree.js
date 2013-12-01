@@ -1,5 +1,5 @@
 var dt = (function () {
-
+          
     function countUniqueAttributes(items, attr) {
         var counter = {};
 
@@ -32,8 +32,6 @@ var dt = (function () {
 
     function split(items, attr, predicate, pivot) {
         var result = {
-            attribute: attr,
-            pivot: pivot,
             match: [],
             notMatch: []
         };
@@ -56,11 +54,11 @@ var dt = (function () {
     function mostFrequentCategory(items, attr) {
         var counter = countUniqueAttributes(items, attr);
 
-        var mostFrequentCount;
+        var mostFrequentCount = 0;
         var mostFrequentCategory;
 
         for (var c in counter) {
-            if (!mostFrequentCategory || (counter[c] > mostFrequentCount)) {
+            if (counter[c] > mostFrequentCount) {
 
                 mostFrequentCount = counter[c];
                 mostFrequentCategory = c;
@@ -116,7 +114,9 @@ var dt = (function () {
                     if (currSplit.gain > 0 && bestSplit.gain < currSplit.gain) {
                         bestSplit = currSplit;
                         bestSplit.predicateName = predicateName;
-                        bestSplit.predicate = predicates[predicateName]
+                        bestSplit.predicate = predicates[predicateName];
+                        bestSplit.attribute = attr;
+                        bestSplit.pivot = item[attr];
                     }
                 }
             }
@@ -181,9 +181,9 @@ var dt = (function () {
 
             builder.trainingSet = [];
 
-            for (var i = 1; i <= items.length; i++) {
-                if (i % (t + 2) == 0) {
-                    builder.trainingSet.push(items[i - 1]);
+            for (var i = 0; i < items.length; i++) {
+                if ((i + 1) % (t + 2) == 0) {
+                    builder.trainingSet.push(items[i]);
                 }
             }
 
@@ -223,7 +223,8 @@ var dt = (function () {
 
         if (builder.removeDefaultPredicates) {
             for (var p in builder.removeDefaultPredicates) {
-                delete predicates[p];
+                var removedPredicateName = builder.removeDefaultPredicates[p];
+                delete predicates[removedPredicateName];
             }
         }
 
