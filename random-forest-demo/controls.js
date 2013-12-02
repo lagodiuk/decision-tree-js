@@ -161,19 +161,4 @@ function init() {
         b: parseInt(result[3], 16)
         } : null;
     }
-    
-    // TODO: it is needed for Decision tree demo
-    function treeToHtml(tree) {
-        if (tree.category) {
-            return '<ul><li><a href="#" style="background-color:' + tree.category + '">&nbsp;</a></li></ul>';
-        }
-        
-        return '<ul><li>' +
-        '<a href="#">' + tree.attribute + ' ' + tree.predicate + ' ' + tree.pivot + '</a>' +
-        '<ul>' +
-        '<li> <a href="#">true</a>' + treeToHtml(tree.match) + '</li>' +
-        '<li> <a href="#">false</a>' + treeToHtml(tree.notMatch) + '</li>' +
-        '</ul>' +
-        '</li></ul>';
-    }
 }
