@@ -1,11 +1,31 @@
 canvas {
     border: 1px solid #ccc;
     margin: 30px;
+    margin-top: 5px;
 }
 
 .color-select {
-    margin: 30px;
+    margin: 1px;
     width : 30px;
     height : 30px;
     display:inline-block;
+}
+
+.color-select:first-child {
+    margin-left: 30px;
+}
+
+.clearBtn {
+    margin-top: 3px;
+    margin-left: 15px;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    border-radius:5px;
+    color: green;
+    background-color: #EDEDED;
+    font-size: 15px;
+    text-decoration: none;
+    cursor: poiner;
+    height: 30px;
+    position: absolute;
 }

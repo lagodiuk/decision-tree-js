@@ -59,7 +59,6 @@ var dt = (function () {
 
         for (var c in counter) {
             if (counter[c] > mostFrequentCount) {
-
                 mostFrequentCount = counter[c];
                 mostFrequentCategory = c;
             }
@@ -77,17 +76,17 @@ var dt = (function () {
         var maxTreeDepth = builder.maxTreeDepth;
         var predicates = builder.predicates;
 
+        if((maxTreeDepth == 0) || (trainingSet.length <= minItemsCount)) {
+          return { category: mostFrequentCategory(trainingSet, categoryAttr) };
+        }
+          
         var initialEntropy = entropy(trainingSet, categoryAttr);
 
-        if ((maxTreeDepth == 0) || (initialEntropy < entropyThrehold) || (trainingSet.length <= minItemsCount)) {
-            return {
-                category: mostFrequentCategory(trainingSet, categoryAttr)
-            }
-        };
+        if (initialEntropy <= entropyThrehold) {
+          return { category: mostFrequentCategory(trainingSet, categoryAttr) };
+        }
 
-        var bestSplit = {
-            gain: 0
-        };
+        var bestSplit = { gain: 0 };
 
         for (var i in trainingSet) {
             var item = trainingSet[i];
@@ -124,9 +123,7 @@ var dt = (function () {
 
         if (bestSplit.gain <= 0) {
             // Can't find optimal split
-            return {
-                category: mostFrequentCategory(trainingSet, categoryAttr)
-            }
+          return { category: mostFrequentCategory(trainingSet, categoryAttr) };
         }
 
         builder.maxTreeDepth = maxTreeDepth - 1;
@@ -174,7 +171,6 @@ var dt = (function () {
         for (var t = 0; t < treesNumber; t++) {
 
             builder.trainingSet = [];
-
             for (var i = 0; i < items.length; i++) {
                 if ((i + 1) % (t + 2) == 0) {
                     builder.trainingSet.push(items[i]);
@@ -191,6 +187,7 @@ var dt = (function () {
         var result = {};
         for (var i in forest) {
             var tree = forest[i];
+          
             var prediction = tree.predict(item);
             if (result[prediction]) {
                 result[prediction] += 1;
@@ -204,15 +201,9 @@ var dt = (function () {
     function DecisionTree(builder) {
 
         var predicates = {
-            '==': function (a, b) {
-                return a == b
-            },
-            '>=': function (a, b) {
-                return a >= b
-            },
-            '<=': function (a, b) {
-                return a <= b
-            }
+            '==': function (a, b) { return a == b },
+            '>=': function (a, b) { return a >= b },
+            '<=': function (a, b) { return a <= b }
         };
 
         if (builder.removeDefaultPredicates) {
