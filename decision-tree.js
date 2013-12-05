@@ -174,7 +174,9 @@ var dt = (function () {
             predicateName: bestSplit.predicateName,
             pivot: bestSplit.pivot,
             match: matchSubTree,
-            notMatch: notMatchSubTree
+            notMatch: notMatchSubTree,
+            matchedCount: bestSplit.match.length,
+            notMatchedCount: bestSplit.notMatch.length
         };
     }
 
