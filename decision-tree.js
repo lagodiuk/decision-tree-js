@@ -167,15 +167,26 @@ var dt = (function () {
         var items = builder.trainingSet;
 
         var forest = [];
+          
+        var trainingSets = [];
+        for (var t = 0; t < treesNumber; t++) {
+            trainingSets[t] = [];
+        }
+        for (var i = 0; i < items.length; i++) {
+          var correspondingTree = i % treesNumber;
+          trainingSets[correspondingTree].push(items[i]);
+        }
 
         for (var t = 0; t < treesNumber; t++) {
-
+            /*
             builder.trainingSet = [];
             for (var i = 0; i < items.length; i++) {
                 if ((i + 1) % (t + 2) == 0) {
                     builder.trainingSet.push(items[i]);
                 }
             }
+            */
+            builder.trainingSet = trainingSets[t];
 
             var tree = new DecisionTree(builder);
             forest.push(tree);
