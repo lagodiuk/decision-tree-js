@@ -1,11 +1,48 @@
 var dt = (function () {
+
+    function DecisionTree(builder) {
           
-    function countUniqueAttributes(items, attr) {
+        var predicates = {
+            '==': function (a, b) { return a == b },
+            '>=': function (a, b) { return a >= b },
+            '<=': function (a, b) { return a <= b }
+        };
+
+        if (builder.removeDefaultPredicates) {
+            for (var p in builder.removeDefaultPredicates) {
+                var removedPredicateName = builder.removeDefaultPredicates[p];
+                delete predicates[removedPredicateName];
+            }
+        }
+
+        this.root = buildDecisionTree({
+            trainingSet: builder.trainingSet,
+            categoryAttr: (builder.categoryAttr ? builder.categoryAttr : 'category'),
+            minItemsCount: (builder.minItemsCount ? builder.minItemsCount : 1),
+            entropyThrehold: (builder.entropyThrehold ? builder.entropyThrehold : 0.01),
+            maxTreeDepth: (builder.maxTreeDepth ? builder.maxTreeDepth : 70),
+            predicates: predicates
+        });
+
+        this.predict = function (item) {
+            return predict(this.root, item);
+        }
+    }
+
+    function RandomForest(builder, treesNumber) {
+
+        this.trees = buildRandomForest(builder, treesNumber);
+
+        this.predict = function (item) {
+            return predictRandomForest(this.trees, item);
+        }
+    }
+          
+    function countUniqueValues(items, attr) {
         var counter = {};
 
         for (var i in items) {
             var item = items[i];
-
             var attrValue = item[attr];
 
             if (counter[attrValue]) {
@@ -19,7 +56,7 @@ var dt = (function () {
     }
 
     function entropy(items, attr) {
-        var counter = countUniqueAttributes(items, attr);
+        var counter = countUniqueValues(items, attr);
 
         var entropy = 0;
         for (var i in counter) {
@@ -31,28 +68,25 @@ var dt = (function () {
     }
 
     function split(items, attr, predicate, pivot) {
-        var result = {
-            match: [],
-            notMatch: []
-        };
+        var match = [];
+        var notMatch = [];
 
         for (var i in items) {
             var item = items[i];
-
             var attrValue = item[attr];
 
             if ((attrValue != null) && predicate(attrValue, pivot)) {
-                result.match.push(item);
+                match.push(item);
             } else {
-                result.notMatch.push(item);
+                notMatch.push(item);
             }
         };
 
-        return result;
+        return { match: match, notMatch: notMatch };
     }
 
     function mostFrequentCategory(items, attr) {
-        var counter = countUniqueAttributes(items, attr);
+        var counter = countUniqueValues(items, attr);
 
         var mostFrequentCount = 0;
         var mostFrequentCategory;
@@ -97,7 +131,6 @@ var dt = (function () {
                 }
 
                 for (var predicateName in predicates) {
-
                     var currSplit = split(trainingSet, attr, predicates[predicateName], item[attr]);
 
                     var matchEntropy = entropy(currSplit.match, categoryAttr);
@@ -108,14 +141,15 @@ var dt = (function () {
                     newEntropy += notMatchEntropy * currSplit.notMatch.length;
                     newEntropy /= trainingSet.length;
 
-                    currSplit.gain = initialEntropy - newEntropy;
+                    var currGain = initialEntropy - newEntropy;
 
-                    if (currSplit.gain > 0 && bestSplit.gain < currSplit.gain) {
+                    if (currGain > 0 && bestSplit.gain < currGain) {
                         bestSplit = currSplit;
                         bestSplit.predicateName = predicateName;
                         bestSplit.predicate = predicates[predicateName];
                         bestSplit.attribute = attr;
                         bestSplit.pivot = item[attr];
+                        bestSplit.gain = currGain;
                     }
                 }
             }
@@ -165,8 +199,6 @@ var dt = (function () {
 
     function buildRandomForest(builder, treesNumber) {
         var items = builder.trainingSet;
-
-        var forest = [];
           
         var trainingSets = [];
         for (var t = 0; t < treesNumber; t++) {
@@ -177,15 +209,8 @@ var dt = (function () {
           trainingSets[correspondingTree].push(items[i]);
         }
 
+        var forest = [];
         for (var t = 0; t < treesNumber; t++) {
-            /*
-            builder.trainingSet = [];
-            for (var i = 0; i < items.length; i++) {
-                if ((i + 1) % (t + 2) == 0) {
-                    builder.trainingSet.push(items[i]);
-                }
-            }
-            */
             builder.trainingSet = trainingSets[t];
 
             var tree = new DecisionTree(builder);
@@ -207,44 +232,6 @@ var dt = (function () {
             }
         }
         return result;
-    }
-
-    function DecisionTree(builder) {
-
-        var predicates = {
-            '==': function (a, b) { return a == b },
-            '>=': function (a, b) { return a >= b },
-            '<=': function (a, b) { return a <= b }
-        };
-
-        if (builder.removeDefaultPredicates) {
-            for (var p in builder.removeDefaultPredicates) {
-                var removedPredicateName = builder.removeDefaultPredicates[p];
-                delete predicates[removedPredicateName];
-            }
-        }
-
-        this.root = buildDecisionTree({
-            trainingSet: builder.trainingSet,
-            categoryAttr: (builder.categoryAttr ? builder.categoryAttr : 'category'),
-            minItemsCount: (builder.minItemsCount ? builder.minItemsCount : 1),
-            entropyThrehold: (builder.entropyThrehold ? builder.entropyThrehold : 0.01),
-            maxTreeDepth: (builder.maxTreeDepth ? builder.maxTreeDepth : 70),
-            predicates: predicates
-        });
-
-        this.predict = function (item) {
-            return predict(this.root, item);
-        }
-    }
-
-    function RandomForest(builder, treesNumber) {
-
-        this.trees = buildRandomForest(builder, treesNumber);
-
-        this.predict = function (item) {
-            return predictRandomForest(this.trees, item);
-        }
     }
 
     var exports = {};
