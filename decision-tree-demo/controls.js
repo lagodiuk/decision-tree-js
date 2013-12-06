@@ -156,21 +156,34 @@ function init() {
         } : null;
     }
     
+    // Repeating of string taken from: http://stackoverflow.com/a/202627/653511
+    var EMPTY_STRING = new Array(26).join('&nbsp;');
+    
+    // Recursively traversing decision tree (DFS)
     function treeToHtml(tree) {
-        // repeat string
-        // (taken from: http://stackoverflow.com/a/202627/653511)
-        var EMPTY_STRING = new Array(26).join('&nbsp;');
         
         if (tree.category) {
-            return '<ul><li><a href="#" style="background-color:' + tree.category + '">' + EMPTY_STRING + '</a></li></ul>';
+            return  '<ul>' +
+                        '<li>' +
+                            '<a href="#" style="background-color:' + tree.category + '">' + EMPTY_STRING + '</a>' +
+                        '</li>' +
+                    '</ul>';
         }
         
-        return '<ul><li>' +
-        '<a href="#"><b>' + tree.attribute + ' ' + tree.predicateName + ' ' + tree.pivot + '</b></a>' +
-        '<ul>' +
-        '<li> <a href="#">true (' + tree.matchedCount + ' points) </a>' + treeToHtml(tree.match) + '</li>' +
-        '<li> <a href="#">false (' + tree.notMatchedCount +' points) </a>' + treeToHtml(tree.notMatch) + '</li>' +
-        '</ul>' +
-        '</li></ul>';
+        return  '<ul>' +
+                    '<li>' +
+                        '<a href="#"><b>' + tree.attribute + ' ' + tree.predicateName + ' ' + tree.pivot + ' ?</b></a>' +
+                        '<ul>' +
+                            '<li>' +
+                                '<a href="#">yes (' + tree.matchedCount + ' points) </a>' +
+                                treeToHtml(tree.match) +
+                            '</li>' +
+                            '<li>' +
+                                '<a href="#">no (' + tree.notMatchedCount + ' points) </a>' +
+                                treeToHtml(tree.notMatch) +
+                            '</li>' +
+                        '</ul>' +
+                    '</li>' +
+                '</ul>';
     }
 }

@@ -14,6 +14,14 @@ var dt = (function () {
                 delete predicates[removedPredicateName];
             }
         }
+        
+        var ignoredAttributes = {};
+        if (builder.ignoredAttributes) {
+            for(var i in builder.ignoredAttributes) {
+                var attr = builder.ignoredAttributes[i];
+                ignoredAttributes[attr] = true;
+            }
+        }
 
         this.root = buildDecisionTree({
             trainingSet: builder.trainingSet,
@@ -21,7 +29,8 @@ var dt = (function () {
             minItemsCount: (builder.minItemsCount ? builder.minItemsCount : 1),
             entropyThrehold: (builder.entropyThrehold ? builder.entropyThrehold : 0.01),
             maxTreeDepth: (builder.maxTreeDepth ? builder.maxTreeDepth : 70),
-            predicates: predicates
+            predicates: predicates,
+            ignoredAttributes: ignoredAttributes
         });
 
         this.predict = function (item) {
@@ -109,6 +118,7 @@ var dt = (function () {
         var entropyThrehold = builder.entropyThrehold;
         var maxTreeDepth = builder.maxTreeDepth;
         var predicates = builder.predicates;
+        var ignoredAttributes = builder.ignoredAttributes;
 
         if((maxTreeDepth == 0) || (trainingSet.length <= minItemsCount)) {
           return { category: mostFrequentCategory(trainingSet, categoryAttr) };
@@ -126,7 +136,7 @@ var dt = (function () {
             var item = trainingSet[i];
 
             for (var attr in item) {
-                if (attr == categoryAttr) {
+                if ((attr == categoryAttr) || ignoredAttributes[attr]) {
                     continue;
                 }
 
