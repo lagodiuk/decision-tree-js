@@ -139,9 +139,12 @@ var dt = (function () {
                 if ((attr == categoryAttr) || ignoredAttributes[attr]) {
                     continue;
                 }
-
+          
+                var attrValue = item[attr];
+          
                 for (var predicateName in predicates) {
-                    var currSplit = split(trainingSet, attr, predicates[predicateName], item[attr]);
+                    var predicate = predicates[predicateName];
+                    var currSplit = split(trainingSet, attr, predicate, attrValue);
 
                     var matchEntropy = entropy(currSplit.match, categoryAttr);
                     var notMatchEntropy = entropy(currSplit.notMatch, categoryAttr);
@@ -156,9 +159,9 @@ var dt = (function () {
                     if (currGain > 0 && bestSplit.gain < currGain) {
                         bestSplit = currSplit;
                         bestSplit.predicateName = predicateName;
-                        bestSplit.predicate = predicates[predicateName];
+                        bestSplit.predicate = predicate;
                         bestSplit.attribute = attr;
-                        bestSplit.pivot = item[attr];
+                        bestSplit.pivot = attrValue;
                         bestSplit.gain = currGain;
                     }
                 }
