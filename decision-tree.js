@@ -1,7 +1,6 @@
 var dt = (function () {
 
     function DecisionTree(builder) {
-          
         var predicates = {
             '==': function (a, b) { return a == b },
             '>=': function (a, b) { return a >= b },
@@ -32,19 +31,18 @@ var dt = (function () {
             predicates: predicates,
             ignoredAttributes: ignoredAttributes
         });
-
-        this.predict = function (item) {
-            return predict(this.root, item);
-        }
+    }
+          
+    DecisionTree.prototype.predict = function (item) {
+        return predict(this.root, item);
     }
 
     function RandomForest(builder, treesNumber) {
-
         this.trees = buildRandomForest(builder, treesNumber);
-
-        this.predict = function (item) {
-            return predictRandomForest(this.trees, item);
-        }
+    }
+          
+    RandomForest.prototype.predict = function (item) {
+        return predictRandomForest(this.trees, item);
     }
           
     function countUniqueValues(items, attr) {
@@ -84,7 +82,7 @@ var dt = (function () {
             var item = items[i];
             var attrValue = item[attr];
 
-            if ((attrValue != null) && predicate(attrValue, pivot)) {
+            if (predicate(attrValue, pivot)) {
                 match.push(item);
             } else {
                 notMatch.push(item);
@@ -132,6 +130,8 @@ var dt = (function () {
 
         var bestSplit = { gain: 0 };
 
+        var cache = {};
+          
         for (var i in trainingSet) {
             var item = trainingSet[i];
 
@@ -143,6 +143,12 @@ var dt = (function () {
                 var attrValue = item[attr];
           
                 for (var predicateName in predicates) {
+                    var cacheKey = attr + predicateName + attrValue;
+                    if(cache[cacheKey] == true) {
+                        continue;
+                    }
+                    cache[cacheKey] = true;
+          
                     var predicate = predicates[predicateName];
                     var currSplit = split(trainingSet, attr, predicate, attrValue);
 
@@ -170,7 +176,7 @@ var dt = (function () {
 
         if (bestSplit.gain <= 0) {
             // Can't find optimal split
-          return { category: mostFrequentCategory(trainingSet, categoryAttr) };
+            return { category: mostFrequentCategory(trainingSet, categoryAttr) };
         }
 
         builder.maxTreeDepth = maxTreeDepth - 1;
@@ -205,7 +211,7 @@ var dt = (function () {
 
         var pivot = tree.pivot;
 
-        if ((attrValue != null) && predicate(attrValue, pivot)) {
+        if (predicate(attrValue, pivot)) {
             return predict(tree.match, item);
         } else {
             return predict(tree.notMatch, item);
