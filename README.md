@@ -20,14 +20,15 @@ var trainingSet =
 var decisionTree = new dt.DecisionTree({
     trainingSet: trainingSet, 
     categoryAttr: 'sex', 
-    removeDefaultPredicates: ['=='],
+    predicates: ['<=', '>='],
     ignoredAttributes: ['person']
 });
 
 var comic = {person: 'Comic', hairLength: 8, weight: 290, age: 38};
 var predictedSex = decisionTree.predict(comic);
 ```
-Online demo: http://jsfiddle.net/xY6Gr/1/
+Online demo: http://jsfiddle.net/xY6Gr/2/
+<br/>
 Data taken from presentation: http://www.cs.sjsu.edu/faculty/lee/cs157b/ID3-AllanNeymark.ppt
 
 2)
@@ -42,8 +43,9 @@ var trainingSet =
 var decisionTree = new dt.DecisionTree({
     trainingSet: trainingSet, 
     categoryAttr: 'decision', 
-    removeDefaultPredicates: ['<=', '>=']
+    predicates: ['==']
 });
 ```
-Online demo: http://jsfiddle.net/rtkrt/3/
+Online demo: http://jsfiddle.net/rtkrt/4/
+<br/>
 Data taken from: http://www.cvc.uab.es/~jbernal/Old%20Page/ID3%20COMPLETE%20EXAMPLE.pdf

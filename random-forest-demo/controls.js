@@ -67,7 +67,7 @@ function init() {
         forest = new dt.RandomForest({
                                      trainingSet: points,
                                      categoryAttr: 'color',
-                                     removeDefaultPredicates: ['==', '<='],
+                                     predicates: ['>='],
                                      minItemsCount: threshold
                                      }, TREES_NUMBER);
         

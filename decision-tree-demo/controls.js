@@ -68,7 +68,7 @@ function init() {
         tree = new dt.DecisionTree({
                                      trainingSet: points,
                                      categoryAttr: 'color',
-                                     removeDefaultPredicates: ['=='],
+                                     predicates: ['<=', '>='],
                                      minItemsCount: threshold
                                      });
         
