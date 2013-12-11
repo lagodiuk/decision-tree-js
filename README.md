@@ -3,19 +3,17 @@ decision-tree-js
 
 Small JavaScript implementation of ID3 Decision tree
 
-1)
 ###Random forest demo###
 
 ![Random forest demo](https://raw.github.com/lagodiuk/decision-tree-js/master/random-forest-demo/demo_2d.png)
 
-2)
 ###Decision tree demo###
 
 ![Decision tree demo](https://raw.github.com/lagodiuk/decision-tree-js/master/decision-tree-demo/demo_2d.png)
 ![Decision tree demo](https://raw.github.com/lagodiuk/decision-tree-js/master/decision-tree-demo/demo_tree.png)
 
-3)
-Predict sex of character from 'The Simpsons'
+###Predict sex of character from 'The Simpsons'###
+Online demo: http://jsfiddle.net/xY6Gr/2/
 ```javascript
 var trainingSet = 
     [{person: 'Homer', hairLength: 0, weight: 250, age: 36, sex: 'male'},
@@ -38,11 +36,10 @@ var decisionTree = new dt.DecisionTree({
 var comic = {person: 'Comic', hairLength: 8, weight: 290, age: 38};
 var predictedSex = decisionTree.predict(comic);
 ```
-Online demo: http://jsfiddle.net/xY6Gr/2/
-<br/>
 Data taken from presentation: http://www.cs.sjsu.edu/faculty/lee/cs157b/ID3-AllanNeymark.ppt
 
-4)
+###Play tennis###
+Online demo: http://jsfiddle.net/rtkrt/4/
 ```javascript
 var trainingSet =
     [{sky: 'sunny', temp: 'warm', humid: 'high', wind: 'strong', water: 'cool', forecast: 'change', decision: 'yes'},
@@ -57,6 +54,4 @@ var decisionTree = new dt.DecisionTree({
     predicates: ['==']
 });
 ```
-Online demo: http://jsfiddle.net/rtkrt/4/
-<br/>
 Data taken from: http://www.cvc.uab.es/~jbernal/Old%20Page/ID3%20COMPLETE%20EXAMPLE.pdf
