@@ -4,12 +4,12 @@ decision-tree-js
 Small JavaScript implementation of ID3 Decision tree
 
 1)
-Random forest demo
+###Random forest demo###
 
 ![Random forest demo](https://raw.github.com/lagodiuk/decision-tree-js/master/random-forest-demo/demo_2d.png)
 
 2)
-Decision tree demo
+###Decision tree demo###
 
 ![Decision tree demo](https://raw.github.com/lagodiuk/decision-tree-js/master/decision-tree-demo/demo_2d.png)
 ![Decision tree demo](https://raw.github.com/lagodiuk/decision-tree-js/master/decision-tree-demo/demo_tree.png)
