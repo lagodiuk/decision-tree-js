@@ -28,7 +28,6 @@ var trainingSet =
 var decisionTree = new dt.DecisionTree({
     trainingSet: trainingSet, 
     categoryAttr: 'sex', 
-    predicates: ['<=', '>='],
     ignoredAttributes: ['person']
 });
 
@@ -49,8 +48,7 @@ var trainingSet =
 
 var decisionTree = new dt.DecisionTree({
     trainingSet: trainingSet, 
-    categoryAttr: 'decision', 
-    predicates: ['==']
+    categoryAttr: 'decision'
 });
 ```
 Data taken from: http://www.cvc.uab.es/~jbernal/Old%20Page/ID3%20COMPLETE%20EXAMPLE.pdf

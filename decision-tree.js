@@ -1,22 +1,11 @@
 var dt = (function () {
 
-    var defaultPredicates = {
+    var predicates = {
         '==': function (a, b) { return a == b },
-        '>=': function (a, b) { return a >= b },
-        '<=': function (a, b) { return a <= b }
+        '>=': function (a, b) { return a >= b }
     };
           
     function DecisionTree(builder) {
-
-        var predicates = {};
-        if (builder.predicates) {
-            for(var i in builder.predicates) {
-                var predicateName = builder.predicates[i];
-                predicates[predicateName] = defaultPredicates[predicateName];
-            }
-        } else {
-            predicates = defaultPredicates;
-        }
         
         var ignoredAttributes = {};
         if (builder.ignoredAttributes) {
@@ -28,12 +17,11 @@ var dt = (function () {
 
         this.root = buildDecisionTree({
             trainingSet: builder.trainingSet,
+            ignoredAttributes: ignoredAttributes,
             categoryAttr: builder.categoryAttr || 'category',
             minItemsCount: builder.minItemsCount || 1,
             entropyThrehold: builder.entropyThrehold || 0.01,
-            maxTreeDepth: builder.maxTreeDepth || 70,
-            predicates: predicates,
-            ignoredAttributes: ignoredAttributes
+            maxTreeDepth: builder.maxTreeDepth || 70
         });
     }
           
@@ -114,23 +102,26 @@ var dt = (function () {
         var categoryAttr = builder.categoryAttr;
         var entropyThrehold = builder.entropyThrehold;
         var maxTreeDepth = builder.maxTreeDepth;
-        var predicates = builder.predicates;
         var ignoredAttributes = builder.ignoredAttributes;
 
-        if((maxTreeDepth == 0) || (trainingSet.length <= minItemsCount)) {
-          return { category: mostFrequentCategory(trainingSet, categoryAttr) };
+        if ((maxTreeDepth == 0) || (trainingSet.length <= minItemsCount)) {
+            return {
+                category: mostFrequentCategory(trainingSet, categoryAttr)
+            };
         }
-          
+
         var initialEntropy = entropy(trainingSet, categoryAttr);
 
         if (initialEntropy <= entropyThrehold) {
-          return { category: mostFrequentCategory(trainingSet, categoryAttr) };
+            return {
+                category: mostFrequentCategory(trainingSet, categoryAttr)
+            };
         }
 
         var bestSplit = { gain: 0 };
 
-        var cache = {};
-          
+        var alreadyChecked = {};
+
         for (var i in trainingSet) {
             var item = trainingSet[i];
 
@@ -138,37 +129,42 @@ var dt = (function () {
                 if ((attr == categoryAttr) || ignoredAttributes[attr]) {
                     continue;
                 }
-          
-                var attrValue = item[attr];
-          
-                for (var predicateName in predicates) {
-                    var cacheKey = attr + predicateName + attrValue;
-                    if(cache[cacheKey] == true) {
-                        continue;
-                    }
-                    cache[cacheKey] = true;
-          
-                    var predicate = predicates[predicateName];
-                    var currSplit = split(trainingSet, attr, predicate, attrValue);
 
-                    var matchEntropy = entropy(currSplit.match, categoryAttr);
-                    var notMatchEntropy = entropy(currSplit.notMatch, categoryAttr);
+                var pivot = item[attr];
 
-                    var newEntropy = 0;
-                    newEntropy += matchEntropy * currSplit.match.length;
-                    newEntropy += notMatchEntropy * currSplit.notMatch.length;
-                    newEntropy /= trainingSet.length;
+                var predicateName;
+                if (typeof pivot == 'number') {
+                    predicateName = '>=';
+                } else {
+                    predicateName = '==';
+                }
 
-                    var currGain = initialEntropy - newEntropy;
+                var attrPredPivot = attr + predicateName + pivot;
+                if (alreadyChecked[attrPredPivot]) {
+                    continue;
+                }
+                alreadyChecked[attrPredPivot] = true;
 
-                    if (currGain > bestSplit.gain) {
-                        bestSplit = currSplit;
-                        bestSplit.predicateName = predicateName;
-                        bestSplit.predicate = predicate;
-                        bestSplit.attribute = attr;
-                        bestSplit.pivot = attrValue;
-                        bestSplit.gain = currGain;
-                    }
+                var predicate = predicates[predicateName];
+                var currSplit = split(trainingSet, attr, predicate, pivot);
+
+                var matchEntropy = entropy(currSplit.match, categoryAttr);
+                var notMatchEntropy = entropy(currSplit.notMatch, categoryAttr);
+
+                var newEntropy = 0;
+                newEntropy += matchEntropy * currSplit.match.length;
+                newEntropy += notMatchEntropy * currSplit.notMatch.length;
+                newEntropy /= trainingSet.length;
+
+                var currGain = initialEntropy - newEntropy;
+
+                if (currGain > bestSplit.gain) {
+                    bestSplit = currSplit;
+                    bestSplit.predicateName = predicateName;
+                    bestSplit.predicate = predicate;
+                    bestSplit.attribute = attr;
+                    bestSplit.pivot = pivot;
+                    bestSplit.gain = currGain;
                 }
             }
         }
@@ -179,13 +175,13 @@ var dt = (function () {
         }
 
         builder.maxTreeDepth = maxTreeDepth - 1;
-          
+
         builder.trainingSet = bestSplit.match;
         var matchSubTree = buildDecisionTree(builder);
-          
+
         builder.trainingSet = bestSplit.notMatch;
         var notMatchSubTree = buildDecisionTree(builder);
-          
+
         return {
             attribute: bestSplit.attribute,
             predicate: bestSplit.predicate,
