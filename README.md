@@ -10,7 +10,6 @@ Small JavaScript implementation of ID3 Decision tree
 ###Decision tree demo###
 
 ![Decision tree demo](https://raw.github.com/lagodiuk/decision-tree-js/master/decision-tree-demo/demo_2d.png)
-![Decision tree demo](https://raw.github.com/lagodiuk/decision-tree-js/master/decision-tree-demo/demo_tree.png)
 
 ###Predict sex of character from 'The Simpsons'###
 Online demo: http://jsfiddle.net/xY6Gr/2/
