@@ -17,7 +17,6 @@ function init() {
     var POINT_RADIUS = 3;
     var points = [];
     var tree = null;
-    var TREES_NUMBER = 7;
     var MAX_ALPHA = 128;
     var addingPoints = false;
 

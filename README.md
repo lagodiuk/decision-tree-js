@@ -4,15 +4,15 @@ decision-tree-js
 Small JavaScript implementation of ID3 Decision tree
 
 ###Random forest demo###
-
+Online demo: http://jsfiddle.net/SjrSz/embedded/result/
 ![Random forest demo](https://raw.github.com/lagodiuk/decision-tree-js/master/random-forest-demo/demo_2d.png)
 
 ###Decision tree demo###
-
+Online demo: http://jsfiddle.net/HJ9Rv/embedded/result/
 ![Decision tree demo](https://raw.github.com/lagodiuk/decision-tree-js/master/decision-tree-demo/demo_2d.png)
 
 ###Predict sex of character from 'The Simpsons'###
-Online demo: http://jsfiddle.net/xY6Gr/2/
+Online demo: http://jsfiddle.net/rz8Wg/2/
 ```javascript
 var trainingSet = 
     [{person: 'Homer', hairLength: 0, weight: 250, age: 36, sex: 'male'},
