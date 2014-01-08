@@ -40,10 +40,12 @@ var dt = (function () {
     function countUniqueValues(items, attr) {
         var counter = {};
 
-        for (var i in items) {
-            var item = items[i];
-            var attrValue = item[attr];
-            counter[attrValue] = counter[attrValue] ? counter[attrValue] + 1 : 1;
+        for (var i = items.length - 1; i >= 0; i--) {
+            counter[items[i][attr]] = 0;
+        }
+          
+        for (var i = items.length - 1; i >= 0; i--) {
+            counter[items[i][attr]] += 1;
         }
 
         return counter;
@@ -53,8 +55,9 @@ var dt = (function () {
         var counter = countUniqueValues(items, attr);
 
         var entropy = 0;
+        var p;
         for (var i in counter) {
-            var p = counter[i] / items.length;
+            p = counter[i] / items.length;
             entropy += -p * Math.log(p);
         }
 
@@ -65,7 +68,7 @@ var dt = (function () {
         var match = [];
         var notMatch = [];
 
-        for (var i in items) {
+        for (var i = items.length - 1; i >= 0; i--) {
             var item = items[i];
             var attrValue = item[attr];
 
@@ -122,7 +125,7 @@ var dt = (function () {
 
         var alreadyChecked = {};
 
-        for (var i in trainingSet) {
+          for (var i = trainingSet.length - 1; i >= 0; i--) {
             var item = trainingSet[i];
 
             for (var attr in item) {
@@ -195,21 +198,29 @@ var dt = (function () {
     }
 
     function predict(tree, item) {
-        if (tree.category) {
-            return tree.category;
-        }
+        var attrName,
+            attrValue,
+            predicate,
+            pivot;
+        
+        // Traversing tree from the root to leaf
+        while(true) {
+            if (tree.category) {
+                return tree.category;
+            }
 
-        var attrName = tree.attribute;
-        var attrValue = item[attrName];
+            attrName = tree.attribute;
+            attrValue = item[attrName];
 
-        var predicate = tree.predicate;
+            predicate = tree.predicate;
 
-        var pivot = tree.pivot;
+            pivot = tree.pivot;
 
-        if (predicate(attrValue, pivot)) {
-            return predict(tree.match, item);
-        } else {
-            return predict(tree.notMatch, item);
+            if (predicate(attrValue, pivot)) {
+                tree = tree.match;
+            } else {
+                tree = tree.notMatch;
+            }
         }
     }
 
@@ -220,7 +231,7 @@ var dt = (function () {
         for (var t = 0; t < treesNumber; t++) {
             trainingSets[t] = [];
         }
-        for (var i = 0; i < items.length; i++) {
+        for (var i = items.length - 1; i >= 0 ; i--) {
           var correspondingTree = i % treesNumber;
           trainingSets[correspondingTree].push(items[i]);
         }
