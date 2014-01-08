@@ -5,13 +5,13 @@ Small JavaScript implementation of ID3 Decision tree
 
 ###Random forest demo###
 
-Online demo: http://jsfiddle.net/SjrSz/embedded/result/
+Online demo: http://jsfiddle.net/SjrSz/1/embedded/result/
 
 ![Random forest demo](https://raw.github.com/lagodiuk/decision-tree-js/master/random-forest-demo/demo_2d.png)
 
 ###Decision tree demo###
 
-Online demo: http://jsfiddle.net/HJ9Rv/embedded/result/
+Online demo: http://jsfiddle.net/HJ9Rv/1/embedded/result/
 
 ![Decision tree demo](https://raw.github.com/lagodiuk/decision-tree-js/master/decision-tree-demo/demo_2d.png)
 
