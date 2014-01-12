@@ -1,10 +1,12 @@
 var dt = (function () {
-
-    var predicates = {
-        '==': function (a, b) { return a == b },
-        '>=': function (a, b) { return a >= b }
-    };
           
+    /**
+     * Creates an instance of DecisionTree
+     *
+     * @constructor
+     * @param builder - contains training set and
+     *                  some configuration parameters
+     */
     function DecisionTree(builder) {
         
         var ignoredAttributes = {};
@@ -29,6 +31,15 @@ var dt = (function () {
         return predict(this.root, item);
     }
 
+    /**
+     * Creates an instance of RandomForest
+     * with specific number of trees
+     *
+     * @constructor
+     * @param builder - contains training set and some
+     *                  configuration parameters for
+     *                  building decision trees
+     */
     function RandomForest(builder, treesNumber) {
         this.trees = buildRandomForest(builder, treesNumber);
     }
@@ -36,22 +47,46 @@ var dt = (function () {
     RandomForest.prototype.predict = function (item) {
         return predictRandomForest(this.trees, item);
     }
-          
+    
+    /**
+     * Calculating how many objects have the same 
+     * values of specific attribute.
+     *
+     * @param items - array of objects
+     *
+     * @param attr  - variable with name of attribute, 
+     *                which embedded in each object
+     */
     function countUniqueValues(items, attr) {
         var counter = {};
 
+        // detecting different values of attribute
         for (var i = items.length - 1; i >= 0; i--) {
+            // items[i][attr] - value of attribute
             counter[items[i][attr]] = 0;
         }
           
+        // counting number of occurrences of each of values
+        // of attribute
         for (var i = items.length - 1; i >= 0; i--) {
             counter[items[i][attr]] += 1;
         }
 
         return counter;
     }
-
+    
+    /**
+     * Calculating entropy of array of objects 
+     * by specific attribute.
+     *
+     * @param items - array of objects
+     *
+     * @param attr  - variable with name of attribute, 
+     *                which embedded in each object
+     */
     function entropy(items, attr) {
+        // counting number of occurrences of each of values
+        // of attribute
         var counter = countUniqueValues(items, attr);
 
         var entropy = 0;
@@ -63,14 +98,37 @@ var dt = (function () {
 
         return entropy;
     }
-
+          
+    /**
+     * Splitting array of objects by value of specific attribute, 
+     * using specific predicate and pivot.
+     *
+     * Items which matched by predicate will be copied to 
+     * the new array called 'match', and the rest of the items 
+     * will be copied to array with name 'notMatch
+     *
+     * @param items - array of objects
+     *
+     * @param attr  - variable with name of attribute,
+     *                which embedded in each object
+     *
+     * @param predicate - function(x, y) 
+     *                    which returns 'true' or 'false'
+     *
+     * @param pivot - used as the second argument when 
+     *                calling predicate function:
+     *                e.g. predicate(item[attr], pivot)
+     */
     function split(items, attr, predicate, pivot) {
         var match = [];
         var notMatch = [];
 
+        var item,
+            attrValue;
+          
         for (var i = items.length - 1; i >= 0; i--) {
-            var item = items[i];
-            var attrValue = item[attr];
+            item = items[i];
+            attrValue = item[attr];
 
             if (predicate(attrValue, pivot)) {
                 match.push(item);
@@ -82,21 +140,37 @@ var dt = (function () {
         return { match: match, notMatch: notMatch };
     }
 
-    function mostFrequentCategory(items, attr) {
+    /**
+     * Finding value of specific attribute which is most frequent
+     * in given array of objects.
+     *
+     * @param items - array of objects
+     *
+     * @param attr  - variable with name of attribute, 
+     *                which embedded in each object
+     */
+    function mostFrequentValue(items, attr) {
+        // counting number of occurrences of each of values
+        // of attribute
         var counter = countUniqueValues(items, attr);
 
         var mostFrequentCount = 0;
-        var mostFrequentCategory;
+        var mostFrequentValue;
 
-        for (var c in counter) {
-            if (counter[c] > mostFrequentCount) {
-                mostFrequentCount = counter[c];
-                mostFrequentCategory = c;
+        for (var value in counter) {
+            if (counter[value] > mostFrequentCount) {
+                mostFrequentCount = counter[value];
+                mostFrequentValue = value;
             }
         };
 
-        return mostFrequentCategory;
+        return mostFrequentValue;
     }
+          
+    var predicates = {
+        '==': function (a, b) { return a == b },
+        '>=': function (a, b) { return a >= b }
+    };
 
     function buildDecisionTree(builder) {
 
@@ -109,7 +183,7 @@ var dt = (function () {
 
         if ((maxTreeDepth == 0) || (trainingSet.length <= minItemsCount)) {
             return {
-                category: mostFrequentCategory(trainingSet, categoryAttr)
+                category: mostFrequentValue(trainingSet, categoryAttr)
             };
         }
 
@@ -117,7 +191,7 @@ var dt = (function () {
 
         if (initialEntropy <= entropyThrehold) {
             return {
-                category: mostFrequentCategory(trainingSet, categoryAttr)
+                category: mostFrequentValue(trainingSet, categoryAttr)
             };
         }
 
@@ -174,7 +248,7 @@ var dt = (function () {
 
         if (!bestSplit.gain) {
             // Can't find optimal split
-            return { category: mostFrequentCategory(trainingSet, categoryAttr) };
+            return { category: mostFrequentValue(trainingSet, categoryAttr) };
         }
 
         builder.maxTreeDepth = maxTreeDepth - 1;
@@ -198,25 +272,27 @@ var dt = (function () {
     }
 
     function predict(tree, item) {
-        var attrName,
-            attrValue,
+        var attr,
+            value,
             predicate,
             pivot;
         
         // Traversing tree from the root to leaf
         while(true) {
+          
             if (tree.category) {
+                // only leafs contains predicted category
                 return tree.category;
             }
 
-            attrName = tree.attribute;
-            attrValue = item[attrName];
+            attr = tree.attribute;
+            value = item[attr];
 
             predicate = tree.predicate;
-
             pivot = tree.pivot;
 
-            if (predicate(attrValue, pivot)) {
+            // move to one of subtrees
+            if (predicate(value, pivot)) {
                 tree = tree.match;
             } else {
                 tree = tree.notMatch;
