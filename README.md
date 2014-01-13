@@ -1,7 +1,7 @@
 decision-tree-js
 ================
 
-Small JavaScript implementation of ID3 Decision tree
+Small JavaScript implementation of algorithm for training <b>ID3 Decision Tree</b> and <b>Random Forest</b> classifiers.
 
 ###Random forest demo###
 
