@@ -5,13 +5,13 @@ Small JavaScript implementation of algorithm for training <b>ID3 Decision Tree</
 
 ###Random forest demo###
 
-Online demo: http://fiddle.jshell.net/SjrSz/2/show/light/ (http://jsfiddle.net/SjrSz/2/)
+Online demo: http://fiddle.jshell.net/SjrSz/2/show/light/ 
 
 ![Random forest demo](https://raw.github.com/lagodiuk/decision-tree-js/master/random-forest-demo/demo_2d.png)
 
 ###Decision tree demo###
 
-Online demo: http://fiddle.jshell.net/HJ9Rv/2/show/light/ (http://jsfiddle.net/HJ9Rv/2/)
+Online demo: http://fiddle.jshell.net/HJ9Rv/2/show/light/
 
 ![Decision tree demo](https://raw.github.com/lagodiuk/decision-tree-js/master/decision-tree-demo/demo_2d.png)
 
