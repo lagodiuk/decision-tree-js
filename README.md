@@ -39,20 +39,3 @@ var comic = {person: 'Comic', hairLength: 8, weight: 290, age: 38};
 var predictedSex = decisionTree.predict(comic);
 ```
 Data taken from presentation: http://www.cs.sjsu.edu/faculty/lee/cs157b/ID3-AllanNeymark.ppt
-
-###Play tennis###
-Online demo: http://jsfiddle.net/rtkrt/4/
-```javascript
-var trainingSet =
-    [{sky: 'sunny', temp: 'warm', humid: 'high', wind: 'strong', water: 'cool', forecast: 'change', decision: 'yes'},
-     {sky: 'rainy', temp: 'cold', humid: 'high', wind: 'strong', water: 'warm', forecast: 'change', decision: 'no'},
-     {sky: 'sunny', temp: 'warm', humid: 'high', wind: 'strong', water: 'warm', forecast: 'same', decision: 'yes'},
-     {sky: 'sunny', temp: 'warm', humid: 'normal', wind: 'strong', water: 'warm', forecast: 'same', decision: 'yes'},
-     {sky: 'sunny', temp: 'warm', humid: 'normal', wind: 'weak', water: 'warm', forecast: 'same', decision: 'no'}];
-
-var decisionTree = new dt.DecisionTree({
-    trainingSet: trainingSet, 
-    categoryAttr: 'decision'
-});
-```
-Data taken from: http://www.cvc.uab.es/~jbernal/Old%20Page/ID3%20COMPLETE%20EXAMPLE.pdf
