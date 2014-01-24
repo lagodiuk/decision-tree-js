@@ -16,7 +16,7 @@ Online demo: http://fiddle.jshell.net/HJ9Rv/2/show/light/
 ![Decision tree demo](https://raw.github.com/lagodiuk/decision-tree-js/master/decision-tree-demo/demo_2d.png)
 
 ###Predict sex of character from 'The Simpsons'###
-Online demo: http://jsfiddle.net/9WvW7/
+Online demo: http://jsfiddle.net/A6hD6/
 ```javascript
 var trainingSet = 
     [{person: 'Homer', hairLength: 0, weight: 250, age: 36, sex: 'male'},
