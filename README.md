@@ -16,7 +16,7 @@ Online demo: http://fiddle.jshell.net/HJ9Rv/2/show/light/
 ![Decision tree demo](https://raw.github.com/lagodiuk/decision-tree-js/master/decision-tree-demo/demo_2d.png)
 
 ###Predict sex of character from 'The Simpsons'###
-Online demo: http://jsfiddle.net/Ec9hh/
+Online demo: http://jsfiddle.net/E3n39/
 ```javascript
 // Training set
 var data = 
@@ -45,7 +45,7 @@ var numberOfTrees = 3;
 var randomForest = new dt.RandomForest(config, numberOfTrees);
 
 // Testing Decision Tree and Random Forest
-var comic = {person: 'Comic', hairLength: 8, weight: 290, age: 38};
+var comic = {person: 'Comic guy', hairLength: 8, weight: 290, age: 38};
 
 var decisionTreePrediction = decisionTree.predict(comic);
 var randomForestPrediction = randomForest.predict(comic);
