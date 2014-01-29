@@ -18,7 +18,7 @@ Online demo: http://fiddle.jshell.net/HJ9Rv/2/show/light/
 ###Toy example###
 Predicting sex of characters from 'The Simpsons' cartoon, using such features as weight, hair length and age
 
-Online demo: http://jsfiddle.net/E3n39/
+Online demo: http://jsfiddle.net/9bvvD/
 ```javascript
 // Training set
 var data = 
