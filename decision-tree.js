@@ -7,19 +7,10 @@ var dt = (function () {
      * @param builder - contains training set and
      *                  some configuration parameters
      */
-    function DecisionTree(builder) {
-        
-        var ignoredAttributes = {};
-        if (builder.ignoredAttributes) {
-            for(var i in builder.ignoredAttributes) {
-                var attr = builder.ignoredAttributes[i];
-                ignoredAttributes[attr] = true;
-            }
-        }
-
+    function DecisionTree(builder) {        
         this.root = buildDecisionTree({
             trainingSet: builder.trainingSet,
-            ignoredAttributes: ignoredAttributes,
+            ignoredAttributes: arrayToHashSet(builder.ignoredAttributes),
             categoryAttr: builder.categoryAttr || 'category',
             minItemsCount: builder.minItemsCount || 1,
             entropyThrehold: builder.entropyThrehold || 0.01,
@@ -46,6 +37,21 @@ var dt = (function () {
           
     RandomForest.prototype.predict = function (item) {
         return predictRandomForest(this.trees, item);
+    }
+    
+    /**
+     * Transforming array to object with such attributes 
+     * as elements of array (afterwards it can be used as HashSet)
+     */
+    function arrayToHashSet(array) {
+        var hashSet = {};
+        if (array) {
+            for(var i in array) {
+                var attr = array[i];
+                hashSet[attr] = true;
+            }
+        }
+        return hashSet;
     }
     
     /**
