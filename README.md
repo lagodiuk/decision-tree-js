@@ -11,14 +11,14 @@ Online demo: http://fiddle.jshell.net/7WsMf/show/light/
 
 ###Decision tree demo###
 
-Online demo: http://fiddle.jshell.net/y6wE4/show/light/
+Online demo: http://fiddle.jshell.net/92Jxj/show/light/
 
 ![Decision tree demo](https://raw.github.com/lagodiuk/decision-tree-js/master/decision-tree-demo/demo_2d.png)
 
 ###Toy example###
 Predicting sex of characters from 'The Simpsons' cartoon, using such features as weight, hair length and age
 
-Online demo: http://jsfiddle.net/9bvvD/
+Online demo: http://jsfiddle.net/PLvGa/
 ```javascript
 // Training set
 var data = 

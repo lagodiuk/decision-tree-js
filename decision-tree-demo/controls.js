@@ -168,27 +168,27 @@ function init() {
     function treeToHtml(tree) {
         
         if (tree.category) {
-            return  '<ul>' +
-                        '<li>' +
-                            '<a href="#" style="background-color:' + tree.category + '">' + EMPTY_STRING + '</a>' +
-                        '</li>' +
-                    '</ul>';
+            return  ['<ul>',
+                        '<li>',
+                            '<a href="#" style="background-color:', tree.category, '">', EMPTY_STRING, '</a>',
+                        '</li>',
+                     '</ul>'].join('');
         }
         
-        return  '<ul>' +
-                    '<li>' +
-                        '<a href="#"><b>' + tree.attribute + ' ' + tree.predicateName + ' ' + tree.pivot + ' ?</b></a>' +
-                        '<ul>' +
-                            '<li>' +
-                                '<a href="#">yes (' + tree.matchedCount + ' points) </a>' +
-                                treeToHtml(tree.match) +
-                            '</li>' +
-                            '<li>' +
-                                '<a href="#">no (' + tree.notMatchedCount + ' points) </a>' +
-                                treeToHtml(tree.notMatch) +
-                            '</li>' +
-                        '</ul>' +
-                    '</li>' +
-                '</ul>';
+        return  ['<ul>',
+                    '<li>',
+                        '<a href="#"><b>', tree.attribute, ' ', tree.predicateName, ' ', tree.pivot, ' ?</b></a>',
+                        '<ul>',
+                            '<li>',
+                                '<a href="#">yes (', tree.matchedCount, ' points) </a>',
+                                treeToHtml(tree.match),
+                            '</li>',
+                            '<li>',
+                                '<a href="#">no (', tree.notMatchedCount, ' points) </a>',
+                                treeToHtml(tree.notMatch),
+                            '</li>',
+                        '</ul>',
+                    '</li>',
+                 '</ul>'].join('');
     }
 }
