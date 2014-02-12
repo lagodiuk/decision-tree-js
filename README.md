@@ -15,7 +15,7 @@ Online demo: http://fiddle.jshell.net/92Jxj/show/light/
 
 ![Decision tree demo](https://raw.github.com/lagodiuk/decision-tree-js/master/decision-tree-demo/demo_2d.png)
 
-###Toy example###
+###Toy example of usage###
 Predicting sex of characters from 'The Simpsons' cartoon, using such features as weight, hair length and age
 
 Online demo: http://jsfiddle.net/xur98/
