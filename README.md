@@ -1,7 +1,7 @@
 decision-tree-js
 ================
 
-Small JavaScript implementation of algorithm for training <b>[Decision Tree](http://en.wikipedia.org/wiki/Decision_tree)</b> and <b>[Random Forest](http://en.wikipedia.org/wiki/Random_forest)</b> classifiers.
+Small JavaScript implementation of algorithm for training [Decision Tree](http://en.wikipedia.org/wiki/Decision_tree) and [Random Forest](http://en.wikipedia.org/wiki/Random_forest) classifiers.
 
 ###Random forest demo###
 
